@@ -8,6 +8,15 @@ public class Raider : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "NavigationSystem", "AIModule", "Niagara", "EnhancedInput" });
+        PublicDependencyModuleNames.AddRange(new string[] 
+	        { 
+		        "Core", "CoreUObject", "Engine", "InputCore", 
+		        "NavigationSystem", 
+		        "AIModule", 
+		        "Niagara", 
+		        "EnhancedInput" 
+	        });
+        
+        OptimizeCode = CodeOptimization.Never;  // remove from real game
     }
 }
