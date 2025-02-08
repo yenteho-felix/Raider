@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "NPC/Enums/ECharacterMovementState.h"
 #include "NPCCombatInterface.generated.h"
 
 // This class does not need to be modified.
@@ -24,9 +25,15 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void EquipWeapon();
 
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void UnEquipWeapon();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void Attack();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	AActor* GetPatrolRoute();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	float SetMovementSpeed(ECharacterMovementState InMovementState);
 };

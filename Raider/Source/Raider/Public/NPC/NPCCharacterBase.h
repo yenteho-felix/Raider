@@ -51,6 +51,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NPC")
 	TObjectPtr<UBehaviorTree> BehaviorTree;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NPC")
+	TObjectPtr<AActor> PatrolRoute;
 	
 	/** Event triggered when weapon equip process ends */
 	UPROPERTY(BlueprintAssignable, Category = "NPC|ComcatInterface")
@@ -76,4 +79,19 @@ protected:
 	/** Broadcasts the OnAttackEnd event */
 	UFUNCTION(BlueprintCallable, Category = "NPC|ComcatInterface")
 	void TriggerOnAttackEnd();
+
+	/** NPCCombatInterface, return patrol route object reference */
+	UFUNCTION(BlueprintCallable, Category = "NPC")
+	AActor* GetPatrolRoute_Implementation() override;
+	
+	/** NPCCombatInterface, return float as movement speed */
+	UFUNCTION(BlueprintCallable, Category = "NPC")
+	float SetMovementSpeed_Implementation(ECharacterMovementState InMovementState) override;
+
+	/** Define a mapping from movement state to movement speed */
+	TMap<ECharacterMovementState, float> MovementSpeeds;
+
+private:
+	/** Query the TMap and return speed for given movement state */
+	float GetMovementSpeed(ECharacterMovementState InMovementState);
 };
