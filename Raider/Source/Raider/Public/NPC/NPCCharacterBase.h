@@ -46,8 +46,14 @@ public:
  *  Behavior Tree
  */
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NPC")
-	TObjectPtr<UBehaviorTree> BehaviorTree;
+	/** Each AI Character type can assign a different behavior tree */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NPC|AIController")
+	TObjectPtr<UBehaviorTree> BehaviorTreeAsset;
+
+protected:
+	/** Setup behavior tree for AIController */
+	UFUNCTION(BlueprintCallable, Category = "NPC|AIController")
+	void SetupDynamicBehaviorTreeAsset() const;
 	
 /**
  *  Combat Interface
