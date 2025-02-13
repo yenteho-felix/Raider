@@ -8,6 +8,7 @@
 #include "Enums/EAIState.h"
 #include "NPCAIController.generated.h"
 
+class ANPCCharacterBase;
 struct FAIStimulus;
 class UAISenseConfig_Damage;
 class UAISenseConfig_Hearing;
@@ -25,17 +26,10 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-public:
-	virtual void Tick(float DeltaTime) override;
-
 /**
  *  Behavior Tree and Blackboard
  */
 public:
-	/** Allow behavior tree to be assigned from other class such as NPCCharacterBase */
-	UPROPERTY(EditAnywhere, Category = "NPC|BehaviorTree")
-	UBehaviorTree* BehaviorTreeAsset;
-
 	UFUNCTION(BlueprintCallable, Category = "NPC|BehaviorTree")
 	void SetStateAsPassive() const;
 
@@ -52,7 +46,7 @@ protected:
 	EAIState GetCurrentState() const;
 
 private:
-	ACharacter* OwnerCharacter;
+	ANPCCharacterBase* OwnerCharacter;
 	
 /**
  *  AI Perception System

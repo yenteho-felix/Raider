@@ -4,7 +4,6 @@
 #include "NPC/NPCCharacterBase.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
-#include "NPC/NPCAIController.h"
 #include "NPC/Enums/ECharacterMovementState.h"
 
 // Sets default values
@@ -24,9 +23,7 @@ ANPCCharacterBase::ANPCCharacterBase()
 void ANPCCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// Get AI controller and assign its behavior tree
-	SetupDynamicBehaviorTreeAsset();
+	
 }
 
 // Called every frame
@@ -40,15 +37,6 @@ void ANPCCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-}
-
-void ANPCCharacterBase::SetupDynamicBehaviorTreeAsset() const
-{
-	ANPCAIController* MyAIController = Cast<ANPCAIController>(GetController());
-	if (MyAIController && BehaviorTreeAsset)
-	{
-		MyAIController->BehaviorTreeAsset = BehaviorTreeAsset;
-	}
 }
 
 void ANPCCharacterBase::TriggerOnEquipWeaponEnd()

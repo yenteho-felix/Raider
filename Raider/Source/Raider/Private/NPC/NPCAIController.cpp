@@ -6,6 +6,7 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
+#include "NPC/NPCCharacterBase.h"
 #include "Perception/AISenseConfig_Damage.h"
 #include "Perception/AISenseConfig_Hearing.h"
 #include "Perception/AISenseConfig_Sight.h"
@@ -57,24 +58,19 @@ void ANPCAIController::BeginPlay()
 	Super::BeginPlay();
 
 	// Get owner character
-	OwnerCharacter = Cast<ACharacter>(GetPawn());
+	OwnerCharacter = Cast<ANPCCharacterBase>(GetPawn());
 	if (!OwnerCharacter)
 	{
 		return;
 	}
-
+	
 	// Run behavior tree
-	if (BehaviorTreeAsset)
+	if (OwnerCharacter && OwnerCharacter->BehaviorTreeAsset)
 	{
-		UseBlackboard(BehaviorTreeAsset->BlackboardAsset, BlackboardComponent);
-		RunBehaviorTree(BehaviorTreeAsset);
+		UseBlackboard(OwnerCharacter->BehaviorTreeAsset->BlackboardAsset, BlackboardComponent);
+		RunBehaviorTree(OwnerCharacter->BehaviorTreeAsset);
 		SetStateAsPassive();
 	}
-}
-
-void ANPCAIController::Tick(const float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 }
 
 void ANPCAIController::SetStateAsPassive() const
