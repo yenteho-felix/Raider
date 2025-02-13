@@ -69,7 +69,7 @@ public:
 
 	/** Event triggered when weapon un-equip process ends */
 	UPROPERTY(BlueprintAssignable, Category = "NPC|ComcatInterface")
-	FOnEquipWeaponEnd OnUnEquipWeaponEnd;
+	FOnUnEquipWeaponEnd OnUnEquipWeaponEnd;
 
 	/** Event triggered when weapon equip process ends */
 	UPROPERTY(BlueprintAssignable, Category = "NPC|ComcatInterface")
