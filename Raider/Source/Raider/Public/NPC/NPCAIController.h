@@ -58,6 +58,9 @@ protected:
 	/** Gets the current AI state from the blackboard */
 	EAIState GetCurrentState() const;
 
+	/** Set combat range variables to the blackboard */
+	void SetCombatRange() const;
+
 private:
 	/** The character who owns this AI controller */
 	UPROPERTY()

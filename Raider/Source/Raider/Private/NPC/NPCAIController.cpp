@@ -96,6 +96,19 @@ EAIState ANPCAIController::GetCurrentState() const
 	return static_cast<EAIState>(BlackboardComponent->GetValueAsEnum("AIState"));
 }
 
+void ANPCAIController::SetCombatRange() const
+{
+	if (OwnerCharacter)
+	{
+		float DefendRadius;
+		float AttackRadius;
+		OwnerCharacter->GetCombatRange_Implementation(AttackRadius, DefendRadius);
+		
+		BlackboardComponent->SetValueAsFloat("AttackRadius", AttackRadius);
+		BlackboardComponent->SetValueAsFloat("DefendRadius", DefendRadius);
+	}
+}
+
 void ANPCAIController::OnPerceptionUpdated(const TArray<AActor*>& UpdatedActors)
 {
 	for (AActor* Actor : UpdatedActors)
