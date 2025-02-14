@@ -34,16 +34,20 @@ protected:
  *  Behavior Tree and Blackboard
  */
 public:
+	/** Sets AI attack target which can be accessible by EQS query */
+	UPROPERTY(BlueprintReadOnly, Category = "NPC|AIState")
+	TObjectPtr<AActor> AttackTarget;
+	
 	/** Sets AI state to Passive */
-	UFUNCTION(BlueprintCallable, Category = "NPC|BehaviorTree")
+	UFUNCTION(BlueprintCallable, Category = "NPC|AIState")
 	void SetStateAsPassive() const;
 
 	/** Sets AI state to Attacking and assigns a target */
-	UFUNCTION(BlueprintCallable, Category = "NPC|BehaviorTree")
-	void SetStateAsAttacking(AActor* TargetActor) const;
+	UFUNCTION(BlueprintCallable, Category = "NPC|AIState")
+	void SetStateAsAttacking(AActor* TargetActor);
 
 	/** Sets AI state to Investigating and updates the target location */
-	UFUNCTION(BlueprintCallable, Category = "NPC|BehaviorTree")
+	UFUNCTION(BlueprintCallable, Category = "NPC|AIState")
 	void SetStateAsInvestigating(const FVector Location) const;
 	
 protected:
@@ -90,7 +94,7 @@ private:
 
 	/** Handles AI response to sight perception */
 	UFUNCTION()
-	void HandleSenseSight(AActor* TargetActor) const;
+	void HandleSenseSight(AActor* TargetActor);
 
 	/** Handles AI response to sound perception */
 	UFUNCTION()
@@ -98,5 +102,5 @@ private:
 
 	/** Handles AI response to detecting damage */
 	UFUNCTION()
-	void HandleSenseDamage(AActor* Actor) const;
+	void HandleSenseDamage(AActor* Actor);
 };

@@ -78,11 +78,11 @@ void ANPCAIController::SetStateAsPassive() const
 	BlackboardComponent->SetValueAsEnum("AIState", static_cast<uint8>(EAIState::Passive));
 }
 
-void ANPCAIController::SetStateAsAttacking(AActor* Target) const
+void ANPCAIController::SetStateAsAttacking(AActor* TargetActor)
 {
 	BlackboardComponent->SetValueAsEnum("AIState", static_cast<uint8>(EAIState::Attacking));
-	BlackboardComponent->SetValueAsObject("AttackTarget", Target);
-
+	BlackboardComponent->SetValueAsObject("AttackTarget", TargetActor);
+	AttackTarget = TargetActor;
 }
 
 void ANPCAIController::SetStateAsInvestigating(const FVector Location) const
@@ -148,7 +148,7 @@ bool ANPCAIController::CanSenseActor(AActor* Actor, const EAISense SenseType, FA
 	return false;
 }
 
-void ANPCAIController::HandleSenseSight(AActor* TargetActor) const
+void ANPCAIController::HandleSenseSight(AActor* TargetActor)
 {
 	EAIState CurrentState = GetCurrentState();
 	if (CurrentState == EAIState::Passive || CurrentState == EAIState::Investigating)
@@ -166,7 +166,7 @@ void ANPCAIController::HandleSenseSound(const FVector& Location) const
 	}
 }
 
-void ANPCAIController::HandleSenseDamage(AActor* Actor) const
+void ANPCAIController::HandleSenseDamage(AActor* Actor)
 {
 	EAIState CurrentState = GetCurrentState();
 	if (CurrentState == EAIState::Passive || CurrentState == EAIState::Investigating)
