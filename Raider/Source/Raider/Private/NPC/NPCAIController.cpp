@@ -6,6 +6,7 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
+#include "NPC/NPCCharacterBase.h"
 #include "Perception/AISenseConfig_Damage.h"
 #include "Perception/AISenseConfig_Hearing.h"
 #include "Perception/AISenseConfig_Sight.h"
@@ -57,24 +58,19 @@ void ANPCAIController::BeginPlay()
 	Super::BeginPlay();
 
 	// Get owner character
-	OwnerCharacter = Cast<ACharacter>(GetPawn());
+	OwnerCharacter = Cast<ANPCCharacterBase>(GetPawn());
 	if (!OwnerCharacter)
 	{
 		return;
 	}
-
+	
 	// Run behavior tree
-	if (BehaviorTreeAsset)
+	if (OwnerCharacter && OwnerCharacter->BehaviorTreeAsset)
 	{
-		UseBlackboard(BehaviorTreeAsset->BlackboardAsset, BlackboardComponent);
-		RunBehaviorTree(BehaviorTreeAsset);
+		UseBlackboard(OwnerCharacter->BehaviorTreeAsset->BlackboardAsset, BlackboardComponent);
+		RunBehaviorTree(OwnerCharacter->BehaviorTreeAsset);
 		SetStateAsPassive();
 	}
-}
-
-void ANPCAIController::Tick(const float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 }
 
 void ANPCAIController::SetStateAsPassive() const
@@ -82,11 +78,11 @@ void ANPCAIController::SetStateAsPassive() const
 	BlackboardComponent->SetValueAsEnum("AIState", static_cast<uint8>(EAIState::Passive));
 }
 
-void ANPCAIController::SetStateAsAttacking(AActor* Target) const
+void ANPCAIController::SetStateAsAttacking(AActor* TargetActor)
 {
 	BlackboardComponent->SetValueAsEnum("AIState", static_cast<uint8>(EAIState::Attacking));
-	BlackboardComponent->SetValueAsObject("AttackTarget", Target);
-
+	BlackboardComponent->SetValueAsObject("AttackTarget", TargetActor);
+	AttackTarget = TargetActor;
 }
 
 void ANPCAIController::SetStateAsInvestigating(const FVector Location) const
@@ -98,6 +94,19 @@ void ANPCAIController::SetStateAsInvestigating(const FVector Location) const
 EAIState ANPCAIController::GetCurrentState() const
 {
 	return static_cast<EAIState>(BlackboardComponent->GetValueAsEnum("AIState"));
+}
+
+void ANPCAIController::SetCombatRange() const
+{
+	if (OwnerCharacter)
+	{
+		float DefendRadius;
+		float AttackRadius;
+		OwnerCharacter->GetCombatRange_Implementation(AttackRadius, DefendRadius);
+		
+		BlackboardComponent->SetValueAsFloat("AttackRadius", AttackRadius);
+		BlackboardComponent->SetValueAsFloat("DefendRadius", DefendRadius);
+	}
 }
 
 void ANPCAIController::OnPerceptionUpdated(const TArray<AActor*>& UpdatedActors)
@@ -152,7 +161,7 @@ bool ANPCAIController::CanSenseActor(AActor* Actor, const EAISense SenseType, FA
 	return false;
 }
 
-void ANPCAIController::HandleSenseSight(AActor* TargetActor) const
+void ANPCAIController::HandleSenseSight(AActor* TargetActor)
 {
 	EAIState CurrentState = GetCurrentState();
 	if (CurrentState == EAIState::Passive || CurrentState == EAIState::Investigating)
@@ -170,7 +179,7 @@ void ANPCAIController::HandleSenseSound(const FVector& Location) const
 	}
 }
 
-void ANPCAIController::HandleSenseDamage(AActor* Actor) const
+void ANPCAIController::HandleSenseDamage(AActor* Actor)
 {
 	EAIState CurrentState = GetCurrentState();
 	if (CurrentState == EAIState::Passive || CurrentState == EAIState::Investigating)

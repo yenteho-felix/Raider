@@ -4,7 +4,6 @@
 #include "NPC/NPCCharacterBase.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
-#include "NPC/NPCAIController.h"
 #include "NPC/Enums/ECharacterMovementState.h"
 
 // Sets default values
@@ -18,15 +17,17 @@ ANPCCharacterBase::ANPCCharacterBase()
 	MovementSpeeds.Add(ECharacterMovementState::Idle, 0.0f);
 	MovementSpeeds.Add(ECharacterMovementState::Walking, 200.0f);
 	MovementSpeeds.Add(ECharacterMovementState::Running, 500.0f);
+
+	// Initialize combat range
+	AttackRadius = 150;
+	DefendRadius = 250;
 }
 
 // Called when the game starts or when spawned
 void ANPCCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// Get AI controller and assign its behavior tree
-	SetupDynamicBehaviorTreeAsset();
+	
 }
 
 // Called every frame
@@ -40,15 +41,6 @@ void ANPCCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-}
-
-void ANPCCharacterBase::SetupDynamicBehaviorTreeAsset() const
-{
-	ANPCAIController* MyAIController = Cast<ANPCAIController>(GetController());
-	if (MyAIController && BehaviorTreeAsset)
-	{
-		MyAIController->BehaviorTreeAsset = BehaviorTreeAsset;
-	}
 }
 
 void ANPCCharacterBase::TriggerOnEquipWeaponEnd()
@@ -76,6 +68,12 @@ float ANPCCharacterBase::SetMovementSpeed_Implementation(ECharacterMovementState
 	GetCharacterMovement()->MaxWalkSpeed = GetMovementSpeed(InMovementState);
 	
 	return GetCharacterMovement()->MaxWalkSpeed;
+}
+
+void ANPCCharacterBase::GetCombatRange_Implementation(float& InAttackRadius, float& InDefendRadius)
+{
+	InAttackRadius = AttackRadius;
+	InDefendRadius = DefendRadius;
 }
 
 float ANPCCharacterBase::GetMovementSpeed(ECharacterMovementState InMovementState)
