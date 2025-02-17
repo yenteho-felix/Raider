@@ -15,12 +15,19 @@ class UNPCCombatInterface : public UInterface
 };
 
 /**
+ *	=========================================================================
  *  A Combat interface to hold combat related functions that NPC needs
+ *  =========================================================================
  */
 class RAIDER_API INPCCombatInterface
 {
 	GENERATED_BODY()
-
+	
+/**
+ *	------------------------------	
+ *  Weapon
+ *	------------------------------	
+ */
 public:
 	/** Called when the NPC equips a weapon. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
@@ -30,24 +37,15 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void UnEquipWeapon();
 
+/**
+ *	------------------------------	
+ *  Combat
+ *	------------------------------	
+ */
+public:
 	/** Called when the NPC performs an attack. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void Attack();
-
-	/**
-	 * Retrieves the patrol route assigned to the NPC.
-	 * @return A reference to an AActor that defines the patrol route.
-	 */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	AActor* GetPatrolRoute();
-
-	/**
-	 * Sets the NPC's movement speed based on the given movement state.
-	 * @param InMovementState - The movement state to apply.
-	 * @return The resulting movement speed after applying the state.
-	 */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	float SetMovementSpeed(ECharacterMovementState InMovementState);
 
 	/**
 	 * Retrieves the combat range of the NPC.
@@ -56,4 +54,25 @@ public:
 	 */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void GetCombatRange(float& AttackRadius, float& DefendRadius);
+	
+/**
+ *	------------------------------
+ *  Movement
+ *	------------------------------	
+ */
+public:
+	/**
+	 * Retrieves the patrol route assigned to the NPC.
+	 * @return A reference to an AActor that defines the patrol route.
+	 */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	AActor* GetPatrolRoute();
+	
+	/**
+	 * Sets the NPC's movement speed based on the given movement state.
+	 * @param InMovementState - The movement state to apply.
+	 * @return The resulting movement speed after applying the state.
+	 */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	float SetMovementSpeed(ECharacterMovementState InMovementState);
 };
