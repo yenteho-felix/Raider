@@ -13,10 +13,13 @@ ANPCCharacterBase::ANPCCharacterBase()
 	PrimaryActorTick.bCanEverTick = true;
 
 	// Initialize movement speeds
+	WalkSpeed = 200.0f;
+	RunSpeed = 500.0f;
+	
 	float CurrentMaxSpeed = GetCharacterMovement()->GetMaxSpeed();
 	MovementSpeeds.Add(ECharacterMovementState::Idle, 0.0f);
-	MovementSpeeds.Add(ECharacterMovementState::Walking, 200.0f);
-	MovementSpeeds.Add(ECharacterMovementState::Running, 500.0f);
+	MovementSpeeds.Add(ECharacterMovementState::Walking, WalkSpeed);
+	MovementSpeeds.Add(ECharacterMovementState::Running, RunSpeed);
 
 	// Initialize combat range
 	AttackRadius = 150;
