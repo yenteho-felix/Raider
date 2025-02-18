@@ -70,6 +70,7 @@ void ANPCAIController::BeginPlay()
 		UseBlackboard(OwnerCharacter->BehaviorTreeAsset->BlackboardAsset, BlackboardComponent);
 		RunBehaviorTree(OwnerCharacter->BehaviorTreeAsset);
 		SetStateAsPassive();
+		SetCombatRange();
 	}
 }
 
