@@ -57,6 +57,18 @@ public:
 	
 /**
  *	------------------------------
+ *  Health
+ *	------------------------------	
+ */
+public:
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	float GetCurrentHealth();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	float GetMaxHealth();
+	
+/**
+ *	------------------------------
  *  Movement
  *	------------------------------	
  */
