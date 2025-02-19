@@ -5,6 +5,8 @@
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "NPC/Enums/ECharacterMovementState.h"
+#include "Share/MyCombatComponent.h"
+#include "Share/MyHealthComponent.h"
 
 // Sets default values
 ANPCCharacterBase::ANPCCharacterBase()
@@ -21,9 +23,11 @@ ANPCCharacterBase::ANPCCharacterBase()
 	MovementSpeeds.Add(ECharacterMovementState::Walking, WalkSpeed);
 	MovementSpeeds.Add(ECharacterMovementState::Running, RunSpeed);
 
-	// Initialize combat range
-	AttackRadius = 150;
-	DefendRadius = 250;
+	// Combat component
+	CombatComponent = CreateDefaultSubobject<UMyCombatComponent>("CombatComponent");
+
+	// Health component
+	HealthComponent = CreateDefaultSubobject<UMyHealthComponent>("HealthComponent");
 }
 
 // Called when the game starts or when spawned
@@ -46,19 +50,96 @@ void ANPCCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 }
 
-void ANPCCharacterBase::TriggerOnEquipWeaponEnd()
+bool ANPCCharacterBase::IsWeaponEquipped_Implementation()
 {
-	OnEquipWeaponEnd.Broadcast();
+	if (!CombatComponent)
+	{
+		return false;
+	}
+
+	return CombatComponent->IsWeaponEquipped;
 }
 
-void ANPCCharacterBase::TriggerOnUnEquipWeaponEnd()
+void ANPCCharacterBase::Attack_Implementation()
 {
-	OnUnEquipWeaponEnd.Broadcast();
+	if (CombatComponent)
+	{
+		CombatComponent->Attack();
+	}
 }
 
-void ANPCCharacterBase::TriggerOnAttackEnd()
+void ANPCCharacterBase::EquipWeapon_Implementation()
 {
-	OnAttackEnd.Broadcast();
+	if (CombatComponent)
+	{
+		CombatComponent->EquipWeapon();
+	}
+}
+
+void ANPCCharacterBase::UnEquipWeapon_Implementation()
+{
+	if (CombatComponent)
+	{
+		CombatComponent->UnEquipWeapon();
+	}
+}
+
+void ANPCCharacterBase::GetCombatRange_Implementation(float& OutAttackRadius, float& OutDefendRadius)
+{
+	if (CombatComponent)
+	{
+		CombatComponent->GetCombatRange(OutAttackRadius, OutDefendRadius);
+	}
+}
+
+float ANPCCharacterBase::GetCurrentHealth_Implementation()
+{
+	if (!HealthComponent)
+	{
+		return 0.0f;
+	}
+
+	return HealthComponent->Health;
+}
+
+float ANPCCharacterBase::GetMaxHealth_Implementation()
+{
+	if (!HealthComponent)
+	{
+		return 0.0f;
+	}
+
+	return HealthComponent->MaxHealth;
+}
+
+void ANPCCharacterBase::TakeHealing_Implementation(const float Amount)
+{
+	if (!HealthComponent)
+	{
+		return;
+	}
+
+	HealthComponent->TakeHealing(Amount);
+}
+
+void ANPCCharacterBase::TakeDamage_Implementation(const float Amount)
+{
+	if (!HealthComponent)
+	{
+		return;
+	}
+
+	HealthComponent->TakeDamage(Amount);
+}
+
+bool ANPCCharacterBase::IsDead_Implementation()
+{
+	if (!HealthComponent)
+	{
+		return false;
+	}
+
+	return !HealthComponent->IsAlive();
 }
 
 AActor* ANPCCharacterBase::GetPatrolRoute_Implementation()
@@ -71,12 +152,6 @@ float ANPCCharacterBase::SetMovementSpeed_Implementation(ECharacterMovementState
 	GetCharacterMovement()->MaxWalkSpeed = GetMovementSpeed(InMovementState);
 	
 	return GetCharacterMovement()->MaxWalkSpeed;
-}
-
-void ANPCCharacterBase::GetCombatRange_Implementation(float& InAttackRadius, float& InDefendRadius)
-{
-	InAttackRadius = AttackRadius;
-	InDefendRadius = DefendRadius;
 }
 
 float ANPCCharacterBase::GetMovementSpeed(ECharacterMovementState InMovementState)

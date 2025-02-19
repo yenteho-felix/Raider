@@ -7,21 +7,12 @@
 #include "GameFramework/Character.h"
 #include "NPCCharacterBase.generated.h"
 
-class AWeaponBase;
+class UMyHealthComponent;
 class UBehaviorTree;
-
-/** Delegate to notify subscribers when weapon equip process is completed */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEquipWeaponEnd);
-
-/** Delegate to notify subscribers when weapon un-equip process is completed */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUnEquipWeaponEnd);
-
-/** Delegate to notify subscribers when attack process is completed */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttackEnd);
 
 /**
  *	========================================================
- *  A base actor class for NPC used in the game
+ *  A base actor class for NPCs in the game
  *  ========================================================
  */
 UCLASS()
@@ -30,18 +21,14 @@ class RAIDER_API ANPCCharacterBase : public ACharacter, public INPCCombatInterfa
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	ANPCCharacterBase();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 /**
@@ -50,92 +37,122 @@ public:
  *  ---------------------------------------------
  */
 public:
-	/** Each AI Character type can assign a unique behavior tree, which can be retrieved from NPCAIController */
+	/** Each AI Character type can assign a unique behavior tree, which can be retrieved from AI Controller */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NPC|AIController")
 	TObjectPtr<UBehaviorTree> BehaviorTreeAsset;
 	
 /**
  *	---------------------------------------------
- *  Combat Interface - Weapon
+ *  Combat Component & Interface
  *  ---------------------------------------------
  */
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NPC|Combat Interface")
-	bool IsWeaponEquipped;
+	/** Component handling NPC combat-related functionalities */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NPC")
+	UMyCombatComponent* CombatComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NPC|Combat Interface")
-	TSubclassOf<AWeaponBase> WeaponActor;
+	/**
+	 *  NPCCombatInterface, check if currently has a weapon equipped.
+	 *  @return True if a weapon is equipped, otherwise false.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "NPC")
+	virtual bool IsWeaponEquipped_Implementation() override;
 	
-	/** Event triggered when weapon equip process ends */
-	UPROPERTY(BlueprintAssignable, Category = "NPC|Combat Interface")
-	FOnEquipWeaponEnd OnEquipWeaponEnd;
+	/** NPCCombatInterface, attack function */
+	UFUNCTION(BlueprintCallable, Category = "NPC")
+	virtual void Attack_Implementation() override;
 
-	/** Event triggered when weapon un-equip process ends */
-	UPROPERTY(BlueprintAssignable, Category = "NPC|Combat Interface")
-	FOnUnEquipWeaponEnd OnUnEquipWeaponEnd;
+	/** NPCCombatInterface, equip function */
+	UFUNCTION(BlueprintCallable, Category = "NPC")
+	virtual void EquipWeapon_Implementation() override;
 
-protected:
-	/** Broadcasts the OnEquipWeaponEnd event */
-	UFUNCTION(BlueprintCallable, Category = "NPC|Combat Interface")
-	void TriggerOnEquipWeaponEnd();
+	/** NPCCombatInterface, UnEquip function */
+	UFUNCTION(BlueprintCallable, Category = "NPC")
+	virtual void UnEquipWeapon_Implementation() override;
 
-	/** Broadcasts the OnUnEquipWeaponEnd event */
-	UFUNCTION(BlueprintCallable, Category = "NPC|Combat Interface")
-	void TriggerOnUnEquipWeaponEnd();
-
-/**
- *	---------------------------------------------
- *  Combat Interface - Combat
- *  ---------------------------------------------
- */
-public:
-	/** Event triggered when weapon equip process ends */
-	UPROPERTY(BlueprintAssignable, Category = "NPC|Combat Interface")
-	FOnAttackEnd OnAttackEnd;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NPC|Combat Interface|Combat")
-	float AttackRadius;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NPC|Combat Interface|Combat")
-	float DefendRadius;
-	
-	/** NPCCombatInterface, retrieve combat range */
-	UFUNCTION(BlueprintCallable, Category = "NPC|Combat Interface")
-	void GetCombatRange_Implementation(float& InAttackRadius, float& InDefendRadius) override;
-
-protected:
-	/** Broadcasts the OnAttackEnd event */
-	UFUNCTION(BlueprintCallable, Category = "NPC|Combat Interface")
-	void TriggerOnAttackEnd();
+	/**
+	 *  NPCCombatInterface, retrieve combat range
+	 *  @param OutAttackRadius - The attack range of the NPC
+	 *  @param OutDefendRadius - The defensive range of the NPC
+	 */
+	UFUNCTION(BlueprintCallable, Category = "NPC")
+	virtual void GetCombatRange_Implementation(float& OutAttackRadius, float& OutDefendRadius) override;
 	
 /**
  *	---------------------------------------------
- *  Combat Interface - Movement
+ *  Health Component & Interface
  *  ---------------------------------------------
  */
 public:
+	/** Component handling NPC health-related functionalities */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NPC")
+	UMyHealthComponent* HealthComponent;
+
+	/** Retrieves the NPC's current health value */
+	UFUNCTION(BlueprintCallable, Category = "NPC")
+	virtual float GetCurrentHealth_Implementation() override;
+
+	/** Retrieves the NPC's maximum health value */
+	UFUNCTION(BlueprintCallable, Category = "NPC")
+	virtual float GetMaxHealth_Implementation() override;
+
+	/**
+	 *  Restores the NPC's health by a specified amount
+	 *  @param Amount - The amount of health to restore
+	 */
+	UFUNCTION(BlueprintCallable, Category = "NPC")
+	virtual void TakeHealing_Implementation(float Amount) override;
+
+	/**
+	 *  Applies damage to the NPC, reducing its current health
+	 *  @param Amount - The amount of damage taken
+	 */
+	UFUNCTION(BlueprintCallable, Category = "NPC")
+	virtual void TakeDamage_Implementation(float Amount) override;
+
+	/** Checks if the NPC is dead */
+	UFUNCTION(BlueprintCallable, Category = "NPC")
+	virtual bool IsDead_Implementation() override;
+	
+/**
+ *	---------------------------------------------
+ *  Movement & Interface
+ *  ---------------------------------------------
+ */
+public:
+	/** The patrol route object that defines NPC patrol movement */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NPC|Combat Interface")
 	TObjectPtr<AActor> PatrolRoute;
-	
+
+	/** Walking speed of the NPC */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NPC|Combat Interface|Movement")
 	float WalkSpeed;
 
+	/** Running speed of the NPC */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NPC|Combat Interface|Movement")
 	float RunSpeed;
 	
 protected:
-	/** NPCCombatInterface, return patrol route object reference */
+	/** NPCCombatInterface, retrieves the patrol route assigned to the NPC */
 	UFUNCTION(BlueprintCallable, Category = "NPC|Combat Interface")
 	AActor* GetPatrolRoute_Implementation() override;
+
+	/** Mapping from movement states to their corresponding movement speeds */
+	TMap<ECharacterMovementState, float> MovementSpeeds;
 	
-	/** NPCCombatInterface, return float as movement speed */
+	/**
+	 *  Sets the NPC's movement speed based on the given movement state
+	 *  @param InMovementState - The movement state to set
+	 *  @return The corresponding movement speed for the state
+	 */
 	UFUNCTION(BlueprintCallable, Category = "NPC|Combat Interface")
 	float SetMovementSpeed_Implementation(ECharacterMovementState InMovementState) override;
 
-	/** Define a mapping from movement state to movement speed */
-	TMap<ECharacterMovementState, float> MovementSpeeds;
-
 private:
-	/** Query the TMap and return speed for given movement state */
+	/**
+	 *  Retrieves the movement speed for a given movement state
+	 *  @param InMovementState - The movement state to query
+	 *  @return The corresponding movement speed
+	 */
 	float GetMovementSpeed(ECharacterMovementState InMovementState);
 };

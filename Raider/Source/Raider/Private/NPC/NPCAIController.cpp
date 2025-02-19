@@ -99,15 +99,26 @@ EAIState ANPCAIController::GetCurrentState() const
 
 void ANPCAIController::SetCombatRange() const
 {
-	if (OwnerCharacter)
+	if (!OwnerCharacter)
 	{
-		float DefendRadius;
-		float AttackRadius;
-		OwnerCharacter->GetCombatRange_Implementation(AttackRadius, DefendRadius);
-		
-		BlackboardComponent->SetValueAsFloat("AttackRadius", AttackRadius);
-		BlackboardComponent->SetValueAsFloat("DefendRadius", DefendRadius);
+		return;
 	}
+
+	// Check if OwnerCharacter implements INPCCombatInterface
+	INPCCombatInterface* CombatInterface = Cast<INPCCombatInterface>(OwnerCharacter);
+	if (!CombatInterface)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s is does not implement the combat interface!"), *OwnerCharacter->GetName());
+		return;
+	}
+	
+	float DefendRadius;
+	float AttackRadius;
+	CombatInterface->Execute_GetCombatRange(OwnerCharacter, AttackRadius, DefendRadius);
+	
+	BlackboardComponent->SetValueAsFloat("AttackRadius", AttackRadius);
+	BlackboardComponent->SetValueAsFloat("DefendRadius", DefendRadius);
+
 }
 
 void ANPCAIController::OnPerceptionUpdated(const TArray<AActor*>& UpdatedActors)
