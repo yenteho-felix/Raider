@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NPCCombatInterface.h"
+#include "../Share/MyCombatInterface.h"
 #include "GameFramework/Character.h"
 #include "NPCCharacterBase.generated.h"
 
@@ -16,7 +16,7 @@ class UBehaviorTree;
  *  ========================================================
  */
 UCLASS()
-class RAIDER_API ANPCCharacterBase : public ACharacter, public INPCCombatInterface
+class RAIDER_API ANPCCharacterBase : public ACharacter, public IMyCombatInterface
 {
 	GENERATED_BODY()
 

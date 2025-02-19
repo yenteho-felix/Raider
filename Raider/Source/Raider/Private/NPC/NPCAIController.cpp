@@ -105,7 +105,7 @@ void ANPCAIController::SetCombatRange() const
 	}
 
 	// Check if OwnerCharacter implements INPCCombatInterface
-	INPCCombatInterface* CombatInterface = Cast<INPCCombatInterface>(OwnerCharacter);
+	IMyCombatInterface* CombatInterface = Cast<IMyCombatInterface>(OwnerCharacter);
 	if (!CombatInterface)
 	{
 		UE_LOG(LogTemp, Error, TEXT("%s is does not implement the combat interface!"), *OwnerCharacter->GetName());

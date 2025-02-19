@@ -5,12 +5,12 @@
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
 #include "NPC/Enums/ECharacterMovementState.h"
-#include "NPCCombatInterface.generated.h"
+#include "MyCombatInterface.generated.h"
 
 class UMyCombatComponent;
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class UNPCCombatInterface : public UInterface
+class UMyCombatInterface : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -20,7 +20,7 @@ class UNPCCombatInterface : public UInterface
  *  A Combat interface to hold combat related functions that NPC needs
  *  =========================================================================
  */
-class RAIDER_API INPCCombatInterface
+class RAIDER_API IMyCombatInterface
 {
 	GENERATED_BODY()
 	
