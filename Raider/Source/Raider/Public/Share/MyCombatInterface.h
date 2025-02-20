@@ -7,9 +7,8 @@
 #include "NPC/Enums/ECharacterMovementState.h"
 #include "MyCombatInterface.generated.h"
 
-class UMyCombatComponent;
-// This class does not need to be modified.
-UINTERFACE(MinimalAPI)
+// Make the interface blueprintable
+UINTERFACE(Blueprintable)
 class UMyCombatInterface : public UInterface
 {
 	GENERATED_BODY()

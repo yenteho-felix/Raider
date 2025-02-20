@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "NPCCharacterBase.generated.h"
 
+class UMyCombatComponent;
 class UMyHealthComponent;
 class UBehaviorTree;
 
