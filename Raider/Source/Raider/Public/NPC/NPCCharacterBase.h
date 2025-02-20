@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "../Share/MyCombatInterface.h"
+#include "Share/MyCombatInterface.h"
 #include "GameFramework/Character.h"
 #include "NPCCharacterBase.generated.h"
 
@@ -106,10 +106,10 @@ public:
 
 	/**
 	 *  Applies damage to the NPC, reducing its current health
-	 *  @param Amount - The amount of damage taken
+	 *  @param DamageInfo - The damage info struct
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NPC")
-	virtual void TakeDamage_Implementation(float Amount) override;
+	virtual void TakeDamage_Implementation(FSDamageInfo DamageInfo) override;
 
 	/** Checks if the NPC is dead */
 	UFUNCTION(BlueprintCallable, Category = "NPC")

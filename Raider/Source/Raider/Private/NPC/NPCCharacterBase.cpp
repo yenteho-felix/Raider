@@ -122,14 +122,14 @@ void ANPCCharacterBase::TakeHealing_Implementation(const float Amount)
 	HealthComponent->TakeHealing(Amount);
 }
 
-void ANPCCharacterBase::TakeDamage_Implementation(const float Amount)
+void ANPCCharacterBase::TakeDamage_Implementation(const FSDamageInfo DamageInfo)
 {
 	if (!HealthComponent)
 	{
 		return;
 	}
 
-	HealthComponent->TakeDamage(Amount);
+	HealthComponent->TakeDamage(DamageInfo.Amount);
 }
 
 bool ANPCCharacterBase::IsDead_Implementation()

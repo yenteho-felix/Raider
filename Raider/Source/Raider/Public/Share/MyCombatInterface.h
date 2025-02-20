@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
 #include "NPC/Enums/ECharacterMovementState.h"
+#include "Struct/FSDamageInfo.h"
 #include "MyCombatInterface.generated.h"
 
 // Make the interface blueprintable
@@ -85,10 +86,10 @@ public:
 
 	/** 
 	 *  Applies damage to the NPC, reducing its current health.
-	 *  @param Amount - The amount of health to subtract.
+	 *  @param DamageInfo - The damage info
 	 */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void TakeDamage(float Amount);
+	void TakeDamage(FSDamageInfo DamageInfo);
 
 	/** 
 	 *  Checks if the NPC is dead (health is zero or below).
