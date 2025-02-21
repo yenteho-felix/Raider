@@ -50,12 +50,13 @@ public:
 	void Attack();
 
 	/**
-	 *  Retrieves the combat range of the NPC.
-	 *  @param AttackRadius - The distance within which the NPC can attack.
-	 *  @param DefendRadius - The distance within which the NPC will consider defending.
+	 *  Retrieves the combat range of the NPC. Add Default C++ implementation.
+	 *  @param OutAttackRadius - The distance within which the NPC can attack.
+	 *  @param OutDefendRadius - The distance within which the NPC will consider defending.
 	 */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void GetCombatRange(float& AttackRadius, float& DefendRadius);
+	void GetCombatRange(float& OutAttackRadius, float& OutDefendRadius);
+	virtual void GetCombatRange_Implementation(float& OutAttackRadius, float& OutDefendRadius);
 
 /**
  *	------------------------------
