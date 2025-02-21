@@ -25,9 +25,12 @@ ANPCCharacterBase::ANPCCharacterBase()
 
 	// Combat component
 	CombatComponent = CreateDefaultSubobject<UMyCombatComponent>("CombatComponent");
+	CombatComponent->FOnDamageReactEvent.AddDynamic(this, &ANPCCharacterBase::OnDamageReactEventHandler);
+	CombatComponent->FOnDamageBlockedEvent.AddDynamic(this, &ANPCCharacterBase::OnDamageBlockedEventHandler);
 
 	// Health component
 	HealthComponent = CreateDefaultSubobject<UMyHealthComponent>("HealthComponent");
+	HealthComponent->FOnDeathEvent.AddDynamic(this, &ANPCCharacterBase::OnDeathEventHandler);
 }
 
 // Called when the game starts or when spawned
@@ -92,13 +95,22 @@ void ANPCCharacterBase::GetCombatRange_Implementation(float& OutAttackRadius, fl
 	}
 }
 
+void ANPCCharacterBase::OnDamageReactEventHandler(EDamageReact DamageReaction)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Damage reaction %d received"), static_cast<uint8>(DamageReaction));
+}
+
+void ANPCCharacterBase::OnDamageBlockedEventHandler()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Damage blocked"));
+}
+
 float ANPCCharacterBase::GetCurrentHealth_Implementation()
 {
 	if (!HealthComponent)
 	{
 		return 0.0f;
 	}
-
 	return HealthComponent->Health;
 }
 
@@ -108,7 +120,6 @@ float ANPCCharacterBase::GetMaxHealth_Implementation()
 	{
 		return 0.0f;
 	}
-
 	return HealthComponent->MaxHealth;
 }
 
@@ -118,18 +129,25 @@ void ANPCCharacterBase::TakeHealing_Implementation(const float Amount)
 	{
 		return;
 	}
-
 	HealthComponent->TakeHealing(Amount);
 }
 
-void ANPCCharacterBase::TakeDamage_Implementation(const FSDamageInfo DamageInfo)
+bool ANPCCharacterBase::TakeDamage_Implementation(const FSDamageInfo& DamageInfo)
 {
 	if (!HealthComponent)
 	{
-		return;
+		return false;
 	}
 
+	// Check if combat logic allows damage to be applied
+	if (CombatComponent && !CombatComponent->ShouldProcessDamage(DamageInfo))
+	{
+		return false;
+	}
+
+	// Apply damage to health
 	HealthComponent->TakeDamage(DamageInfo.Amount);
+	return true;
 }
 
 bool ANPCCharacterBase::IsDead_Implementation()
@@ -138,8 +156,21 @@ bool ANPCCharacterBase::IsDead_Implementation()
 	{
 		return false;
 	}
-
 	return !HealthComponent->IsAlive();
+}
+
+void ANPCCharacterBase::HandleDeath_Implementation()
+{
+	if (!HealthComponent)
+	{
+		return;
+	}
+	HealthComponent->HandleDeath();
+}
+
+void ANPCCharacterBase::OnDeathEventHandler()
+{
+	UE_LOG(LogTemp, Warning, TEXT("OnDeath"));
 }
 
 AActor* ANPCCharacterBase::GetPatrolRoute_Implementation()

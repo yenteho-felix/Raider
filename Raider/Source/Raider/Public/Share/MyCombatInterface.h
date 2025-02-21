@@ -89,7 +89,7 @@ public:
 	 *  @param DamageInfo - The damage info
 	 */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void TakeDamage(FSDamageInfo DamageInfo);
+	bool TakeDamage(const FSDamageInfo& DamageInfo);
 
 	/** 
 	 *  Checks if the NPC is dead (health is zero or below).
@@ -97,6 +97,12 @@ public:
 	 */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	bool IsDead();
+
+	/** 
+	 *  Apply necessary death logic when character is dead 
+	 */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void HandleDeath();
 	
 /**
  *	------------------------------

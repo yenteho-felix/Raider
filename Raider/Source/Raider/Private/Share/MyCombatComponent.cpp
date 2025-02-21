@@ -3,17 +3,20 @@
 
 #include "Share/MyCombatComponent.h"
 
+#include "Share/Struct/FSDamageInfo.h"
 #include "Weapon/WeaponBase.h"
 
 
 // Sets default values for this component's properties
-UMyCombatComponent::UMyCombatComponent()
+UMyCombatComponent::UMyCombatComponent():
+	IsWeaponEquipped(false),
+	AttackRadius(0),
+	DefendRadius(0),
+	bIsInvincible(false),
+	bIsBlocking(false),
+	bIsInterruptible(true)
 {
 	PrimaryComponentTick.bCanEverTick = false;
-
-	// Default value
-	AttackRadius = 150.0f;
-	DefendRadius = 250.0f;
 }
 
 
@@ -184,6 +187,30 @@ void UMyCombatComponent::PlayAttackMontage(UAnimMontage* AnimMontage)
 void UMyCombatComponent::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted) const
 {
 	OnAttackEnd.Broadcast();
+}
+
+bool UMyCombatComponent::ShouldProcessDamage(const FSDamageInfo& DamageInfo) const
+{
+	// Determine the type of damage handling
+	if (bIsBlocking && DamageInfo.CanBeBlocked)
+	{
+		// Block damage
+		FOnDamageBlockedEvent.Broadcast();
+		return false;
+	}
+
+	if (bIsInvincible && !DamageInfo.ShouldDamageInvisible)
+	{
+		// No damage taken due to invincibility
+		return false;
+	}
+
+	// Handle reaction to damage
+	if (bIsInterruptible || DamageInfo.ShouldForceInterrupt)
+	{
+		FOnDamageReactEvent.Broadcast(DamageInfo.DamageReact);
+	}
+	return true;
 }
 
 // void UMyCombatComponent::TriggerOnAttackEnd() const

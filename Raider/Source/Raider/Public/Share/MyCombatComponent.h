@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "MyCombatComponent.generated.h"
 
-
+struct FSDamageInfo;
 class AWeaponBase;
 
 /** Delegate to notify subscribers when weapon equip process is completed */
@@ -17,6 +17,12 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUnEquipWeaponEnd);
 
 /** Delegate to notify subscribers when attack process is completed */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttackEnd);
+
+/** Delegate to notify subscribers when character is taking damage */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDamageReact, EDamageReact, DamageReaction);
+
+/** Delegate to notify subscribers when character is blocking damage */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDamageBlocked);
 
 /**
  *  =====================================================
@@ -170,4 +176,38 @@ public:
 	 *  @param bInterrupted - Whether the montage was interrupted.
 	 */	UFUNCTION(BlueprintCallable, Category = "Combat|Attack")
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted) const;
+
+/**
+ *	---------------------------------------------
+ *  Defense & Response
+ *  ---------------------------------------------
+ */
+public:
+	/** Indicates whether the character is invincible */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	bool bIsInvincible;
+	
+	/** Indicate whether the character is blocking */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	bool bIsBlocking;
+
+	/** Indicate whether the damage can be interrupted */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	bool bIsInterruptible;
+	
+	/**
+	 *  React to damage
+	 *  @param DamageInfo - The damage info
+	 *  @Return return true if character is taking damage, otherwise false
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	bool ShouldProcessDamage(const FSDamageInfo& DamageInfo) const;
+
+	/** Delegate event triggered when the character is taking damage */
+	UPROPERTY(BlueprintAssignable, Category = "Health")
+	FOnDamageReact FOnDamageReactEvent;
+
+	/** Delegate event triggered when the character is blocking damage */
+	UPROPERTY(BlueprintAssignable, Category = "Health")
+	FOnDamageBlocked FOnDamageBlockedEvent;
 };

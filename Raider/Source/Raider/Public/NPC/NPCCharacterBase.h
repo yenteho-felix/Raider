@@ -10,6 +10,7 @@
 class UMyCombatComponent;
 class UMyHealthComponent;
 class UBehaviorTree;
+struct FSDamageInfo;
 
 /**
  *	========================================================
@@ -78,7 +79,12 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NPC")
 	virtual void GetCombatRange_Implementation(float& OutAttackRadius, float& OutDefendRadius) override;
-	
+
+	UFUNCTION(BlueprintCallable, Category = "NPC")
+	void OnDamageReactEventHandler(EDamageReact DamageReaction);
+
+	UFUNCTION(BlueprintCallable, Category = "NPC")
+	void OnDamageBlockedEventHandler();
 /**
  *	---------------------------------------------
  *  Health Component & Interface
@@ -109,11 +115,18 @@ public:
 	 *  @param DamageInfo - The damage info struct
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NPC")
-	virtual void TakeDamage_Implementation(FSDamageInfo DamageInfo) override;
+	virtual bool TakeDamage_Implementation(const FSDamageInfo& DamageInfo) override;
 
 	/** Checks if the NPC is dead */
 	UFUNCTION(BlueprintCallable, Category = "NPC")
 	virtual bool IsDead_Implementation() override;
+
+	/** Default implementation when NPC character dead */
+	UFUNCTION(BlueprintCallable, Category = "NPC")
+	virtual void HandleDeath_Implementation() override;
+	
+	UFUNCTION(BlueprintCallable, Category = "NPC")
+	void OnDeathEventHandler();
 	
 /**
  *	---------------------------------------------
