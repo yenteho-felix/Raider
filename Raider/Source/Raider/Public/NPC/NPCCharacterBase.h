@@ -53,31 +53,24 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NPC")
 	UMyCombatComponent* CombatComponent;
 
-	/**
-	 *  NPCCombatInterface, check if currently has a weapon equipped.
-	 *  @return True if a weapon is equipped, otherwise false.
-	 */
-	UFUNCTION(BlueprintCallable, Category = "NPC")
+	/** NPCCombatInterface, check if currently has a weapon equipped */
+	UFUNCTION(Category = "NPC")
 	virtual bool IsWeaponEquipped_Implementation() override;
 	
 	/** NPCCombatInterface, attack function */
-	UFUNCTION(BlueprintCallable, Category = "NPC")
+	UFUNCTION(Category = "NPC")
 	virtual void Attack_Implementation() override;
 
 	/** NPCCombatInterface, equip function */
-	UFUNCTION(BlueprintCallable, Category = "NPC")
+	UFUNCTION(Category = "NPC")
 	virtual void EquipWeapon_Implementation() override;
 
 	/** NPCCombatInterface, UnEquip function */
-	UFUNCTION(BlueprintCallable, Category = "NPC")
+	UFUNCTION(Category = "NPC")
 	virtual void UnEquipWeapon_Implementation() override;
 
-	/**
-	 *  NPCCombatInterface, retrieve combat range
-	 *  @param OutAttackRadius - The attack range of the NPC
-	 *  @param OutDefendRadius - The defensive range of the NPC
-	 */
-	UFUNCTION(BlueprintCallable, Category = "NPC")
+	/** NPCCombatInterface, retrieve combat range */
+	UFUNCTION(Category = "NPC")
 	virtual void GetCombatRange_Implementation(float& OutAttackRadius, float& OutDefendRadius) override;
 
 	UFUNCTION(BlueprintCallable, Category = "NPC")
@@ -85,6 +78,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "NPC")
 	void OnDamageBlockedEventHandler();
+	
 /**
  *	---------------------------------------------
  *  Health Component & Interface
@@ -96,33 +90,27 @@ public:
 	UMyHealthComponent* HealthComponent;
 
 	/** Retrieves the NPC's current health value */
-	UFUNCTION(BlueprintCallable, Category = "NPC")
+	UFUNCTION(Category = "NPC")
 	virtual float GetCurrentHealth_Implementation() override;
 
 	/** Retrieves the NPC's maximum health value */
-	UFUNCTION(BlueprintCallable, Category = "NPC")
+	UFUNCTION(Category = "NPC")
 	virtual float GetMaxHealth_Implementation() override;
 
-	/**
-	 *  Restores the NPC's health by a specified amount
-	 *  @param Amount - The amount of health to restore
-	 */
-	UFUNCTION(BlueprintCallable, Category = "NPC")
+	/** Restores the NPC's health by a specified amount */
+	UFUNCTION(Category = "NPC")
 	virtual void TakeHealing_Implementation(float Amount) override;
 
-	/**
-	 *  Applies damage to the NPC, reducing its current health
-	 *  @param DamageInfo - The damage info struct
-	 */
-	UFUNCTION(BlueprintCallable, Category = "NPC")
+	/** Applies damage to the NPC, reducing its current health */
+	UFUNCTION(Category = "NPC")
 	virtual bool TakeDamage_Implementation(const FSDamageInfo& DamageInfo) override;
 
 	/** Checks if the NPC is dead */
-	UFUNCTION(BlueprintCallable, Category = "NPC")
+	UFUNCTION(Category = "NPC")
 	virtual bool IsDead_Implementation() override;
 
 	/** Default implementation when NPC character dead */
-	UFUNCTION(BlueprintCallable, Category = "NPC")
+	UFUNCTION(Category = "NPC")
 	virtual void HandleDeath_Implementation() override;
 	
 	UFUNCTION(BlueprintCallable, Category = "NPC")
@@ -145,24 +133,19 @@ public:
 	/** Running speed of the NPC */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NPC|Combat Interface|Movement")
 	float RunSpeed;
+
+	/** NPCCombatInterface, retrieves the patrol route assigned to the NPC */
+	UFUNCTION(Category = "NPC|Combat Interface")
+	virtual AActor* GetPatrolRoute_Implementation() override;
+	
+	/** NPCCombatInterface, sets the NPC's movement speed based on the given movement state */
+	UFUNCTION(Category = "NPC|Combat Interface")
+	virtual float SetMovementSpeed_Implementation(ECharacterMovementState InMovementState) override;
 	
 protected:
-	/** NPCCombatInterface, retrieves the patrol route assigned to the NPC */
-	UFUNCTION(BlueprintCallable, Category = "NPC|Combat Interface")
-	AActor* GetPatrolRoute_Implementation() override;
-
 	/** Mapping from movement states to their corresponding movement speeds */
 	TMap<ECharacterMovementState, float> MovementSpeeds;
-	
-	/**
-	 *  Sets the NPC's movement speed based on the given movement state
-	 *  @param InMovementState - The movement state to set
-	 *  @return The corresponding movement speed for the state
-	 */
-	UFUNCTION(BlueprintCallable, Category = "NPC|Combat Interface")
-	float SetMovementSpeed_Implementation(ECharacterMovementState InMovementState) override;
 
-private:
 	/**
 	 *  Retrieves the movement speed for a given movement state
 	 *  @param InMovementState - The movement state to query
