@@ -49,6 +49,10 @@ public:
 	/** Sets AI state to Investigating and updates the target location */
 	UFUNCTION(BlueprintCallable, Category = "NPC|AIState")
 	void SetStateAsInvestigating(const FVector Location) const;
+
+	/** Sets AI state to Dead */
+	UFUNCTION(BlueprintCallable, Category = "NPC|AIState")
+	void SetStateAsDead() const;
 	
 protected:
 	/** Blackboard component to store blackboard instance we used */

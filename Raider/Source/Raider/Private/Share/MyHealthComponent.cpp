@@ -3,10 +3,6 @@
 
 #include "Share/MyHealthComponent.h"
 
-#include "GameFramework/Character.h"
-#include "GameFramework/CharacterMovementComponent.h"
-#include "Share/Struct/FSDamageInfo.h"
-
 // Sets default values for this component's properties
 UMyHealthComponent::UMyHealthComponent()
 {
@@ -27,6 +23,11 @@ void UMyHealthComponent::BeginPlay()
 
 void UMyHealthComponent::TakeHealing(const float HealAmount)
 {
+	if (!IsAlive())
+	{
+		return;
+	}
+	
 	Health += HealAmount;
 	Health = FMath::Clamp(Health, 0.0f, MaxHealth);
 }
@@ -46,9 +47,7 @@ void UMyHealthComponent::TakeDamage(const float Amount)
 	if (!IsAlive())
 	{
 		FOnDeathEvent.Broadcast();
-		HandleDeath();
 	}
-	return;
 }
 
 bool UMyHealthComponent::IsAlive() const
@@ -56,34 +55,11 @@ bool UMyHealthComponent::IsAlive() const
 	return Health > 0;
 }
 
-void UMyHealthComponent::HandleDeath() const
-{
-	if (AActor* Owner = GetOwner())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s has died!"), *Owner->GetName());
-
-		if (const ACharacter* Character = Cast<ACharacter>(Owner))
-		{
-			Character->GetCharacterMovement()->DisableMovement();
-
-			PlayDeathMontage(DeathMontage);
-		}
-
-		// Destroy the actor after a delay
-		Owner->SetLifeSpan(10.0f);
-	}
-}
-
 void UMyHealthComponent::PlayDeathMontage(UAnimMontage* AnimMontage) const
 {
-	if (!AnimMontage)
-	{
-		return;
-	}
-
 	if (const AActor* Owner = GetOwner())
 	{
-		if (const USkeletalMeshComponent* MeshComponent = Owner->FindComponentByClass<USkeletalMeshComponent>())
+		if (USkeletalMeshComponent* MeshComponent = Owner->FindComponentByClass<USkeletalMeshComponent>())
 		{
 			if (UAnimInstance* AnimInstance = MeshComponent->GetAnimInstance())
 			{
@@ -92,4 +68,18 @@ void UMyHealthComponent::PlayDeathMontage(UAnimMontage* AnimMontage) const
 		}
 	}
 }
+
+void UMyHealthComponent::PlayDeathRagDoll() const
+{
+	if (const AActor* Owner = GetOwner())
+	{
+		if (USkeletalMeshComponent* MeshComponent = Owner->FindComponentByClass<USkeletalMeshComponent>())
+		{
+			MeshComponent->SetSimulatePhysics(true);
+			MeshComponent->WakeAllRigidBodies();
+			MeshComponent->SetCollisionProfileName("Ragdoll");
+		}
+	}
+}
+
 

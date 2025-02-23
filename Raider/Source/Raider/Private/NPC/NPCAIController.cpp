@@ -92,6 +92,11 @@ void ANPCAIController::SetStateAsInvestigating(const FVector Location) const
 	BlackboardComponent->SetValueAsVector("Location", Location);
 }
 
+void ANPCAIController::SetStateAsDead() const
+{
+	BlackboardComponent->SetValueAsEnum("AIState", static_cast<uint8>(EAIState::Dead));
+}
+
 EAIState ANPCAIController::GetCurrentState() const
 {
 	return static_cast<EAIState>(BlackboardComponent->GetValueAsEnum("AIState"));

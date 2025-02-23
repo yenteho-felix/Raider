@@ -111,10 +111,7 @@ public:
 
 	/** Default implementation when NPC character dead */
 	UFUNCTION(Category = "NPC")
-	virtual void HandleDeath_Implementation() override;
-	
-	UFUNCTION(BlueprintCallable, Category = "NPC")
-	void OnDeathEventHandler();
+	virtual void OnDeathEventHandler_Implementation() override;
 	
 /**
  *	---------------------------------------------

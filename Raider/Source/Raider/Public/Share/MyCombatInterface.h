@@ -103,7 +103,7 @@ public:
 	 *  Apply necessary death logic when character is dead 
 	 */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void HandleDeath();
+	void OnDeathEventHandler();
 	
 /**
  *	------------------------------

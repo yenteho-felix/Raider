@@ -30,7 +30,7 @@ protected:
 
 public:
 	/** Animation montage played when character is dead */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	TObjectPtr<UAnimMontage> DeathMontage;
 	
 	/** Current health of the entity */
@@ -62,12 +62,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	bool IsAlive() const;
 
-	/**
-	 *  Apply necessary death logic when character is dead 
-	 */
-	UFUNCTION(BlueprintCallable, Category = "Health")
-	void HandleDeath() const;
-
 /**
  *  -----------------------------------------
  *  Delegates
@@ -83,11 +77,17 @@ public:
  *  Animations
  *  -----------------------------------------
  */	
-protected:
+public:
 	/**
 	 *  Plays the death montage animation.
 	 *  @param AnimMontage - The montage to play when character is dead
 	 */
 	UFUNCTION()
 	void PlayDeathMontage(UAnimMontage* AnimMontage) const;
+
+	/**
+	 *  Play ragboll death
+	 */
+	UFUNCTION()
+	void PlayDeathRagDoll() const;
 };

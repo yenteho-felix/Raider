@@ -3,7 +3,11 @@
 
 #include "NPC/NPCCharacterBase.h"
 
+#include "AIController.h"
+#include "BrainComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "NPC/NPCAIController.h"
 #include "NPC/Enums/ECharacterMovementState.h"
 #include "Share/MyCombatComponent.h"
 #include "Share/MyHealthComponent.h"
@@ -159,18 +163,38 @@ bool ANPCCharacterBase::IsDead_Implementation()
 	return !HealthComponent->IsAlive();
 }
 
-void ANPCCharacterBase::HandleDeath_Implementation()
+void ANPCCharacterBase::OnDeathEventHandler_Implementation()
 {
-	if (!HealthComponent)
+	// Stop AI logic if the actor has an AI controller
+	if (const ANPCAIController* AIController = Cast<ANPCAIController>(GetInstigatorController()))
 	{
-		return;
+		AIController->SetStateAsDead();
+		if (UBrainComponent* BrainComponent = AIController->GetBrainComponent())
+		{
+			BrainComponent->StopLogic("Character is Dead");
+		}
 	}
-	HealthComponent->HandleDeath();
-}
 
-void ANPCCharacterBase::OnDeathEventHandler()
-{
-	UE_LOG(LogTemp, Warning, TEXT("OnDeath"));
+	//Play death animation
+	if (HealthComponent)
+	{
+		if (HealthComponent->DeathMontage)
+		{
+			HealthComponent->PlayDeathMontage(HealthComponent->DeathMontage);
+		}
+		else
+		{
+			HealthComponent->PlayDeathRagDoll();
+		}
+	}
+
+	// Stop movement & collision
+	GetCharacterMovement()->StopMovementImmediately();
+	GetCharacterMovement()->DisableMovement();
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	// Destroy the actor after a delay
+	Owner->SetLifeSpan(10.0f);
 }
 
 AActor* ANPCCharacterBase::GetPatrolRoute_Implementation()
