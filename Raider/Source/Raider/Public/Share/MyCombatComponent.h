@@ -21,6 +21,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttackEnd);
 /** Delegate to notify subscribers when character is taking damage */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDamageReact, EDamageReact, DamageReaction);
 
+/** Delegate to notify subscribers when attack process is completed */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTakeHitEnd);
+
 /** Delegate to notify subscribers when character is blocking damage */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDamageBlocked);
 
@@ -165,16 +168,16 @@ protected:
 	void PlayAttackMontage(UAnimMontage* AnimMontage);
 	
 public:
-	/** Event triggered when weapon equip process ends */
+	/** Event triggered when attack process ends */
 	UPROPERTY(BlueprintAssignable, Category = "Combat|Attack")
 	FOnAttackEnd OnAttackEnd;
 	
 	/**
 	 *  Callback function triggered when the attack montage animation finishes.
-	 *  Broadcasts the `OnAttackEnd` event.
 	 *  @param Montage - The animation montage that completed.
 	 *  @param bInterrupted - Whether the montage was interrupted.
-	 */	UFUNCTION(BlueprintCallable, Category = "Combat|Attack")
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Combat|Attack")
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted) const;
 
 /**
@@ -183,16 +186,20 @@ public:
  *  ---------------------------------------------
  */
 public:
+	/** Animation montage played when taking hit */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Defense")
+	TObjectPtr<UAnimMontage> TakeHitMontage;
+	
 	/** Indicates whether the character is invincible */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Defense")
 	bool bIsInvincible;
 	
 	/** Indicate whether the character is blocking */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Defense")
 	bool bIsBlocking;
 
 	/** Indicate whether the damage can be interrupted */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Defense")
 	bool bIsInterruptible;
 	
 	/**
@@ -200,14 +207,39 @@ public:
 	 *  @param DamageInfo - The damage info
 	 *  @Return return true if character is taking damage, otherwise false
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Health")
+	UFUNCTION(BlueprintCallable, Category = "Combat|Defense")
 	bool ShouldProcessDamage(const FSDamageInfo& DamageInfo) const;
 
 	/** Delegate event triggered when the character is taking damage */
-	UPROPERTY(BlueprintAssignable, Category = "Health")
+	UPROPERTY(BlueprintAssignable, Category = "Combat|Defense")
 	FOnDamageReact FOnDamageReactEvent;
 
 	/** Delegate event triggered when the character is blocking damage */
-	UPROPERTY(BlueprintAssignable, Category = "Health")
+	UPROPERTY(BlueprintAssignable, Category = "Combat|Defense")
 	FOnDamageBlocked FOnDamageBlockedEvent;
+
+	/** Taking hit */
+	UFUNCTION(BlueprintCallable, Category = "Combat|Defense")
+	void TakeHit();
+	
+protected:
+	/**
+	 *  Plays the hit montage animation.
+	 *  @param AnimMontage - The montage to play when taking hit
+	 */
+	UFUNCTION(Category = "Combat|Defense")
+	void PlayTakeHitMontage(UAnimMontage* AnimMontage);
+
+public:
+	/** Event triggered when taking hit process ends */
+	UPROPERTY(BlueprintAssignable, Category = "Combat|Defense")
+	FOnTakeHitEnd FOnTakeHitEndEvent;
+	
+	/**
+	 *  Callback function triggered when the taking hit montage animation finishes.
+	 *  Broadcasts the `OnTakeHitEnd` event.
+	 *  @param Montage - The animation montage that completed.
+	 *  @param bInterrupted - Whether the montage was interrupted.
+	 */	UFUNCTION(BlueprintCallable, Category = "Combat|Defense")
+	void OnTakeHitMontageEnded(UAnimMontage* Montage, bool bInterrupted) const;
 };

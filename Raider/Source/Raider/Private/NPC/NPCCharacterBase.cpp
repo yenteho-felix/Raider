@@ -31,6 +31,7 @@ ANPCCharacterBase::ANPCCharacterBase()
 	CombatComponent = CreateDefaultSubobject<UMyCombatComponent>("CombatComponent");
 	CombatComponent->FOnDamageReactEvent.AddDynamic(this, &ANPCCharacterBase::OnDamageReactEventHandler);
 	CombatComponent->FOnDamageBlockedEvent.AddDynamic(this, &ANPCCharacterBase::OnDamageBlockedEventHandler);
+	CombatComponent->FOnTakeHitEndEvent.AddDynamic(this, &ANPCCharacterBase::OnTakeHitEndEventHandler);
 
 	// Health component
 	HealthComponent = CreateDefaultSubobject<UMyHealthComponent>("HealthComponent");
@@ -99,9 +100,38 @@ void ANPCCharacterBase::GetCombatRange_Implementation(float& OutAttackRadius, fl
 	}
 }
 
-void ANPCCharacterBase::OnDamageReactEventHandler(EDamageReact DamageReaction)
+void ANPCCharacterBase::OnDamageReactEventHandler_Implementation(EDamageReact DamageReaction)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Damage reaction %d received"), static_cast<uint8>(DamageReaction));
+	
+	// Stop movement
+	GetCharacterMovement()->StopMovementImmediately();
+
+	// Update behavior tree to frozen
+	if (const ANPCAIController* AIController = Cast<ANPCAIController>(GetInstigatorController()))
+	{
+		AIController->SetStateAsFrozen();
+	}
+
+	// Reaction type specific
+	if (DamageReaction == EDamageReact::Hit)
+	{
+		if (!CombatComponent)
+		{
+			return;
+		}
+		CombatComponent->TakeHit();
+	}
+}
+
+void ANPCCharacterBase::OnTakeHitEndEventHandler()
+{
+	// Update behavior tree to attacking
+	if (ANPCAIController* AIController = Cast<ANPCAIController>(GetInstigatorController()))
+	{
+		AActor* Target = AIController->AttackTarget;
+		AIController->SetStateAsAttacking(Target);
+	}
 }
 
 void ANPCCharacterBase::OnDamageBlockedEventHandler()

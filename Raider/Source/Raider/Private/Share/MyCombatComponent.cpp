@@ -137,16 +137,6 @@ void UMyCombatComponent::OnUnEquipMontageEnded(UAnimMontage* Montage, bool bInte
 	OnUnEquipWeaponEnd.Broadcast();
 }
 
-// void UMyCombatComponent::TriggerOnEquipWeaponEnd() const
-// {
-// 	OnEquipWeaponEnd.Broadcast();
-// }
-
-// void UMyCombatComponent::TriggerOnUnEquipWeaponEnd() const
-// {
-// 	OnUnEquipWeaponEnd.Broadcast();
-// }
-
 void UMyCombatComponent::GetCombatRange(float& OutAttackRadius, float& OutDefendRadius) const
 {
 	OutAttackRadius = AttackRadius;
@@ -175,7 +165,8 @@ void UMyCombatComponent::PlayAttackMontage(UAnimMontage* AnimMontage)
 			if (UAnimInstance* AnimInstance = MeshComponent->GetAnimInstance())
 			{
 				AnimInstance->Montage_Play(AnimMontage);
-
+				
+				// Bind to montage end event
 				FOnMontageEnded MontageEndDelegate;
 				MontageEndDelegate.BindUObject(this, &UMyCombatComponent::OnAttackMontageEnded);
 				AnimInstance->Montage_SetEndDelegate(MontageEndDelegate, AnimMontage);
@@ -213,8 +204,42 @@ bool UMyCombatComponent::ShouldProcessDamage(const FSDamageInfo& DamageInfo) con
 	return true;
 }
 
-// void UMyCombatComponent::TriggerOnAttackEnd() const
-// {
-// 	OnAttackEnd.Broadcast();
-// }
+void UMyCombatComponent::TakeHit()
+{
+	if (TakeHitMontage)
+	{
+		if (const AActor* Owner = GetOwner())
+		{
+			PlayTakeHitMontage(TakeHitMontage);
+		}
+	}
+}
+
+void UMyCombatComponent::PlayTakeHitMontage(UAnimMontage* AnimMontage)
+{
+	if (!AnimMontage)
+	{
+		return;
+	}
+
+	if (const AActor* Owner = GetOwner())
+	{
+		if (const USkeletalMeshComponent* MeshComponent = Owner->FindComponentByClass<USkeletalMeshComponent>())
+		{
+			if (UAnimInstance* AnimInstance = MeshComponent->GetAnimInstance())
+			{
+				AnimInstance->Montage_Play(AnimMontage);
+
+				FOnMontageEnded MontageEndDelegate;
+				MontageEndDelegate.BindUObject(this, &UMyCombatComponent::OnTakeHitMontageEnded);
+				AnimInstance->Montage_SetEndDelegate(MontageEndDelegate, AnimMontage);
+			}
+		}
+	}
+}
+
+void UMyCombatComponent::OnTakeHitMontageEnded(UAnimMontage* Montage, bool bInterrupted) const
+{
+	FOnTakeHitEndEvent.Broadcast();
+}
 

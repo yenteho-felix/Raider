@@ -58,6 +58,12 @@ public:
 	void GetCombatRange(float& OutAttackRadius, float& OutDefendRadius);
 	virtual void GetCombatRange_Implementation(float& OutAttackRadius, float& OutDefendRadius);
 
+	/** 
+	 *  Apply necessary logic when character get damaged 
+	 */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void OnDamageReactEventHandler(EDamageReact DamageReaction);
+
 /**
  *	------------------------------
  *  Health

@@ -42,6 +42,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "NPC|AIState")
 	void SetStateAsPassive() const;
 
+	/** Sets AI state to Frozen */
+	UFUNCTION(BlueprintCallable, Category = "NPC|AIState")
+	void SetStateAsFrozen() const;
+
 	/** Sets AI state to Attacking and assigns a target */
 	UFUNCTION(BlueprintCallable, Category = "NPC|AIState")
 	void SetStateAsAttacking(AActor* TargetActor);

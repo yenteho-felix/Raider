@@ -73,9 +73,15 @@ public:
 	UFUNCTION(Category = "NPC")
 	virtual void GetCombatRange_Implementation(float& OutAttackRadius, float& OutDefendRadius) override;
 
-	UFUNCTION(BlueprintCallable, Category = "NPC")
-	void OnDamageReactEventHandler(EDamageReact DamageReaction);
+	/** NPCCombatInterface, activities when taking damage */
+	UFUNCTION(Category = "NPC")
+	virtual void OnDamageReactEventHandler_Implementation(EDamageReact DamageReaction) override;
 
+	/** Activities after taking hit ended */
+	UFUNCTION(BlueprintCallable, Category = "NPC")
+	void OnTakeHitEndEventHandler();
+
+	/** Activities when blocking damage */
 	UFUNCTION(BlueprintCallable, Category = "NPC")
 	void OnDamageBlockedEventHandler();
 	

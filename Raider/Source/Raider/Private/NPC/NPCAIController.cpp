@@ -79,6 +79,11 @@ void ANPCAIController::SetStateAsPassive() const
 	BlackboardComponent->SetValueAsEnum("AIState", static_cast<uint8>(EAIState::Passive));
 }
 
+void ANPCAIController::SetStateAsFrozen() const
+{
+	BlackboardComponent->SetValueAsEnum("AIState", static_cast<uint8>(EAIState::Frozen));
+}
+
 void ANPCAIController::SetStateAsAttacking(AActor* TargetActor)
 {
 	BlackboardComponent->SetValueAsEnum("AIState", static_cast<uint8>(EAIState::Attacking));
