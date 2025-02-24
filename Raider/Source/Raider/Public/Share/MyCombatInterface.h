@@ -5,12 +5,12 @@
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
 #include "NPC/Enums/ECharacterMovementState.h"
-#include "NPCCombatInterface.generated.h"
+#include "Struct/FSDamageInfo.h"
+#include "MyCombatInterface.generated.h"
 
-class UMyCombatComponent;
-// This class does not need to be modified.
-UINTERFACE(MinimalAPI)
-class UNPCCombatInterface : public UInterface
+// Make the interface blueprintable
+UINTERFACE(Blueprintable)
+class UMyCombatInterface : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -20,7 +20,7 @@ class UNPCCombatInterface : public UInterface
  *  A Combat interface to hold combat related functions that NPC needs
  *  =========================================================================
  */
-class RAIDER_API INPCCombatInterface
+class RAIDER_API IMyCombatInterface
 {
 	GENERATED_BODY()
 	
@@ -50,12 +50,19 @@ public:
 	void Attack();
 
 	/**
-	 *  Retrieves the combat range of the NPC.
-	 *  @param AttackRadius - The distance within which the NPC can attack.
-	 *  @param DefendRadius - The distance within which the NPC will consider defending.
+	 *  Retrieves the combat range of the NPC. Add Default C++ implementation.
+	 *  @param OutAttackRadius - The distance within which the NPC can attack.
+	 *  @param OutDefendRadius - The distance within which the NPC will consider defending.
 	 */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void GetCombatRange(float& AttackRadius, float& DefendRadius);
+	void GetCombatRange(float& OutAttackRadius, float& OutDefendRadius);
+	virtual void GetCombatRange_Implementation(float& OutAttackRadius, float& OutDefendRadius);
+
+	/** 
+	 *  Apply necessary logic when character get damaged 
+	 */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void OnDamageReactEventHandler(EDamageReact DamageReaction);
 
 /**
  *	------------------------------
@@ -86,10 +93,10 @@ public:
 
 	/** 
 	 *  Applies damage to the NPC, reducing its current health.
-	 *  @param Amount - The amount of health to subtract.
+	 *  @param DamageInfo - The damage info
 	 */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void TakeDamage(float Amount);
+	bool TakeDamage(const FSDamageInfo& DamageInfo);
 
 	/** 
 	 *  Checks if the NPC is dead (health is zero or below).
@@ -97,6 +104,12 @@ public:
 	 */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	bool IsDead();
+
+	/** 
+	 *  Apply necessary death logic when character is dead 
+	 */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void OnDeathEventHandler();
 	
 /**
  *	------------------------------

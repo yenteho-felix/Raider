@@ -42,6 +42,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "NPC|AIState")
 	void SetStateAsPassive() const;
 
+	/** Sets AI state to Frozen */
+	UFUNCTION(BlueprintCallable, Category = "NPC|AIState")
+	void SetStateAsFrozen() const;
+
 	/** Sets AI state to Attacking and assigns a target */
 	UFUNCTION(BlueprintCallable, Category = "NPC|AIState")
 	void SetStateAsAttacking(AActor* TargetActor);
@@ -49,6 +53,10 @@ public:
 	/** Sets AI state to Investigating and updates the target location */
 	UFUNCTION(BlueprintCallable, Category = "NPC|AIState")
 	void SetStateAsInvestigating(const FVector Location) const;
+
+	/** Sets AI state to Dead */
+	UFUNCTION(BlueprintCallable, Category = "NPC|AIState")
+	void SetStateAsDead() const;
 	
 protected:
 	/** Blackboard component to store blackboard instance we used */

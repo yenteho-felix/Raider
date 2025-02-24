@@ -3,17 +3,20 @@
 
 #include "Share/MyCombatComponent.h"
 
+#include "Share/Struct/FSDamageInfo.h"
 #include "Weapon/WeaponBase.h"
 
 
 // Sets default values for this component's properties
-UMyCombatComponent::UMyCombatComponent()
+UMyCombatComponent::UMyCombatComponent():
+	IsWeaponEquipped(false),
+	AttackRadius(0),
+	DefendRadius(0),
+	bIsInvincible(false),
+	bIsBlocking(false),
+	bIsInterruptible(true)
 {
 	PrimaryComponentTick.bCanEverTick = false;
-
-	// Default value
-	AttackRadius = 150.0f;
-	DefendRadius = 250.0f;
 }
 
 
@@ -134,16 +137,6 @@ void UMyCombatComponent::OnUnEquipMontageEnded(UAnimMontage* Montage, bool bInte
 	OnUnEquipWeaponEnd.Broadcast();
 }
 
-// void UMyCombatComponent::TriggerOnEquipWeaponEnd() const
-// {
-// 	OnEquipWeaponEnd.Broadcast();
-// }
-
-// void UMyCombatComponent::TriggerOnUnEquipWeaponEnd() const
-// {
-// 	OnUnEquipWeaponEnd.Broadcast();
-// }
-
 void UMyCombatComponent::GetCombatRange(float& OutAttackRadius, float& OutDefendRadius) const
 {
 	OutAttackRadius = AttackRadius;
@@ -172,7 +165,8 @@ void UMyCombatComponent::PlayAttackMontage(UAnimMontage* AnimMontage)
 			if (UAnimInstance* AnimInstance = MeshComponent->GetAnimInstance())
 			{
 				AnimInstance->Montage_Play(AnimMontage);
-
+				
+				// Bind to montage end event
 				FOnMontageEnded MontageEndDelegate;
 				MontageEndDelegate.BindUObject(this, &UMyCombatComponent::OnAttackMontageEnded);
 				AnimInstance->Montage_SetEndDelegate(MontageEndDelegate, AnimMontage);
@@ -186,8 +180,66 @@ void UMyCombatComponent::OnAttackMontageEnded(UAnimMontage* Montage, bool bInter
 	OnAttackEnd.Broadcast();
 }
 
-// void UMyCombatComponent::TriggerOnAttackEnd() const
-// {
-// 	OnAttackEnd.Broadcast();
-// }
+bool UMyCombatComponent::ShouldProcessDamage(const FSDamageInfo& DamageInfo) const
+{
+	// Determine the type of damage handling
+	if (bIsBlocking && DamageInfo.CanBeBlocked)
+	{
+		// Block damage
+		FOnDamageBlockedEvent.Broadcast();
+		return false;
+	}
+
+	if (bIsInvincible && !DamageInfo.ShouldDamageInvisible)
+	{
+		// No damage taken due to invincibility
+		return false;
+	}
+
+	// Handle reaction to damage
+	if (bIsInterruptible || DamageInfo.ShouldForceInterrupt)
+	{
+		FOnDamageReactEvent.Broadcast(DamageInfo.DamageReact);
+	}
+	return true;
+}
+
+void UMyCombatComponent::TakeHit()
+{
+	if (TakeHitMontage)
+	{
+		if (const AActor* Owner = GetOwner())
+		{
+			PlayTakeHitMontage(TakeHitMontage);
+		}
+	}
+}
+
+void UMyCombatComponent::PlayTakeHitMontage(UAnimMontage* AnimMontage)
+{
+	if (!AnimMontage)
+	{
+		return;
+	}
+
+	if (const AActor* Owner = GetOwner())
+	{
+		if (const USkeletalMeshComponent* MeshComponent = Owner->FindComponentByClass<USkeletalMeshComponent>())
+		{
+			if (UAnimInstance* AnimInstance = MeshComponent->GetAnimInstance())
+			{
+				AnimInstance->Montage_Play(AnimMontage);
+
+				FOnMontageEnded MontageEndDelegate;
+				MontageEndDelegate.BindUObject(this, &UMyCombatComponent::OnTakeHitMontageEnded);
+				AnimInstance->Montage_SetEndDelegate(MontageEndDelegate, AnimMontage);
+			}
+		}
+	}
+}
+
+void UMyCombatComponent::OnTakeHitMontageEnded(UAnimMontage* Montage, bool bInterrupted) const
+{
+	FOnTakeHitEndEvent.Broadcast();
+}
 
