@@ -46,7 +46,7 @@ void UMyHealthComponent::TakeDamage(const float Amount)
 	// Handle death if health reaches zero
 	if (!IsAlive())
 	{
-		FOnDeathEvent.Broadcast();
+		OnDeath.Broadcast();
 	}
 }
 

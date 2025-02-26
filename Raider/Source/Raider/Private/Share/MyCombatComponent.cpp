@@ -186,7 +186,7 @@ bool UMyCombatComponent::ShouldProcessDamage(const FSDamageInfo& DamageInfo) con
 	if (bIsBlocking && DamageInfo.CanBeBlocked)
 	{
 		// Block damage
-		FOnDamageBlockedEvent.Broadcast();
+		OnDamageBlocked.Broadcast();
 		return false;
 	}
 
@@ -199,7 +199,7 @@ bool UMyCombatComponent::ShouldProcessDamage(const FSDamageInfo& DamageInfo) con
 	// Handle reaction to damage
 	if (bIsInterruptible || DamageInfo.ShouldForceInterrupt)
 	{
-		FOnDamageReactEvent.Broadcast(DamageInfo.DamageReact);
+		OnDamageReact.Broadcast(DamageInfo.DamageReact);
 	}
 	return true;
 }
@@ -240,6 +240,6 @@ void UMyCombatComponent::PlayTakeHitMontage(UAnimMontage* AnimMontage)
 
 void UMyCombatComponent::OnTakeHitMontageEnded(UAnimMontage* Montage, bool bInterrupted) const
 {
-	FOnTakeHitEndEvent.Broadcast();
+	OnTakeHitEnd.Broadcast();
 }
 

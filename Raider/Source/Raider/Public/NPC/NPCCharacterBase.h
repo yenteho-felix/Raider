@@ -72,18 +72,6 @@ public:
 	/** NPCCombatInterface, retrieve combat range */
 	UFUNCTION(Category = "NPC")
 	virtual void GetCombatRange_Implementation(float& OutAttackRadius, float& OutDefendRadius) override;
-
-	/** NPCCombatInterface, activities when taking damage */
-	UFUNCTION(Category = "NPC")
-	virtual void OnDamageReactEventHandler_Implementation(EDamageReact DamageReaction) override;
-
-	/** Activities after taking hit ended */
-	UFUNCTION(BlueprintCallable, Category = "NPC")
-	void OnTakeHitEndEventHandler();
-
-	/** Activities when blocking damage */
-	UFUNCTION(BlueprintCallable, Category = "NPC")
-	void OnDamageBlockedEventHandler();
 	
 /**
  *	---------------------------------------------
@@ -114,10 +102,6 @@ public:
 	/** Checks if the NPC is dead */
 	UFUNCTION(Category = "NPC")
 	virtual bool IsDead_Implementation() override;
-
-	/** Default implementation when NPC character dead */
-	UFUNCTION(Category = "NPC")
-	virtual void OnDeathEventHandler_Implementation() override;
 	
 /**
  *	---------------------------------------------
@@ -155,4 +139,26 @@ protected:
 	 *  @return The corresponding movement speed
 	 */
 	float GetMovementSpeed(ECharacterMovementState InMovementState);
+
+/**
+ *	---------------------------------------------
+ *  Delegate Events
+ *  ---------------------------------------------
+ */
+private:
+	/** NPCCombatInterface, activities when taking damage */
+	UFUNCTION(Category = "NPC|Delegate")
+	virtual void OnDamageReactHandler_Implementation(EDamageReact DamageReaction) override;
+
+	/** Default implementation when NPC character dead */
+	UFUNCTION(Category = "NPC|Delegate")
+	virtual void OnDeathHandler_Implementation() override;
+	
+	/** Activities after taking hit ended */
+	UFUNCTION(Category = "NPC|Delegate")
+	void OnTakeHitEndHandler();
+
+	/** Activities when blocking damage */
+	UFUNCTION(Category = "NPC|Delegate")
+	void OnDamageBlockedHandler();
 };

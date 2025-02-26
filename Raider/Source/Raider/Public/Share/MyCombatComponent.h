@@ -102,32 +102,6 @@ protected:
 	 */
 	UFUNCTION()
 	void PlayUnEquipMontage(UAnimMontage* AnimMontage);
-	
-public:
-	/** Event triggered when weapon equip process ends */
-	UPROPERTY(BlueprintAssignable, Category = "Combat|Weapon")
-	FOnEquipWeaponEnd OnEquipWeaponEnd;
-
-	/** Event triggered when weapon un-equip process ends */
-	UPROPERTY(BlueprintAssignable, Category = "Combat|Weapon")
-	FOnUnEquipWeaponEnd OnUnEquipWeaponEnd;
-
-protected:
-	/**
-	 *  Callback function triggered when the equip montage animation finishes.
-	 *  Broadcasts the `OnEquipWeaponEnd` event.
-	 *  @param Montage - The animation montage that completed.
-	 *  @param bInterrupted - Whether the montage was interrupted.
-	 */	UFUNCTION()
-	void OnEquipMontageEnded(UAnimMontage* Montage, bool bInterrupted) const;
-
-	/**
-	 *  Callback function triggered when the unequip montage animation finishes.
-	 *  Broadcasts the `OnUnEquipWeaponEnd` event.
-	 *  @param Montage - The animation montage that completed.
-	 *  @param bInterrupted - Whether the montage was interrupted.
-	 */	UFUNCTION()
-	void OnUnEquipMontageEnded(UAnimMontage* Montage, bool bInterrupted) const;
 
 /**
  *	---------------------------------------------
@@ -167,19 +141,6 @@ protected:
 	UFUNCTION()
 	void PlayAttackMontage(UAnimMontage* AnimMontage);
 	
-public:
-	/** Event triggered when attack process ends */
-	UPROPERTY(BlueprintAssignable, Category = "Combat|Attack")
-	FOnAttackEnd OnAttackEnd;
-	
-	/**
-	 *  Callback function triggered when the attack montage animation finishes.
-	 *  @param Montage - The animation montage that completed.
-	 *  @param bInterrupted - Whether the montage was interrupted.
-	 */
-	UFUNCTION(BlueprintCallable, Category = "Combat|Attack")
-	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted) const;
-
 /**
  *	---------------------------------------------
  *  Defense & Response
@@ -210,14 +171,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat|Defense")
 	bool ShouldProcessDamage(const FSDamageInfo& DamageInfo) const;
 
-	/** Delegate event triggered when the character is taking damage */
-	UPROPERTY(BlueprintAssignable, Category = "Combat|Defense")
-	FOnDamageReact FOnDamageReactEvent;
-
-	/** Delegate event triggered when the character is blocking damage */
-	UPROPERTY(BlueprintAssignable, Category = "Combat|Defense")
-	FOnDamageBlocked FOnDamageBlockedEvent;
-
 	/** Taking hit */
 	UFUNCTION(BlueprintCallable, Category = "Combat|Defense")
 	void TakeHit();
@@ -230,16 +183,70 @@ protected:
 	UFUNCTION(Category = "Combat|Defense")
 	void PlayTakeHitMontage(UAnimMontage* AnimMontage);
 
+/**
+ *  ---------------------------------------------------------------------
+ *  Delegate Events
+ *  ---------------------------------------------------------------------
+ */
 public:
-	/** Event triggered when taking hit process ends */
-	UPROPERTY(BlueprintAssignable, Category = "Combat|Defense")
-	FOnTakeHitEnd FOnTakeHitEndEvent;
+	/** Event triggered when weapon equip process ends */
+	UPROPERTY(BlueprintAssignable, Category = "Combat|Delegate")
+	FOnEquipWeaponEnd OnEquipWeaponEnd;
+
+	/** Event triggered when weapon un-equip process ends */
+	UPROPERTY(BlueprintAssignable, Category = "Combat|Delegate")
+	FOnUnEquipWeaponEnd OnUnEquipWeaponEnd;
+
+	/** Delegate event triggered when the character is taking damage */
+	UPROPERTY(BlueprintAssignable, Category = "Combat|Delegate")
+	FOnDamageReact OnDamageReact;
+
+	/** Delegate event triggered when the character is blocking damage */
+	UPROPERTY(BlueprintAssignable, Category = "Combat|Delegate")
+	FOnDamageBlocked OnDamageBlocked;
 	
+	/** Event triggered when taking hit process ends */
+	UPROPERTY(BlueprintAssignable, Category = "Combat|Delegate")
+	FOnTakeHitEnd OnTakeHitEnd;
+
+	/** Event triggered when attack process ends */
+	UPROPERTY(BlueprintAssignable, Category = "Combat|Delegate")
+	FOnAttackEnd OnAttackEnd;
+
+public:
+	/**
+	 *  Callback function triggered when the attack montage animation finishes.
+	 *  @param Montage - The animation montage that completed.
+	 *  @param bInterrupted - Whether the montage was interrupted.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Combat|Delegate")
+	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted) const;
+	
+protected:
+	/**
+	 *  Callback function triggered when the equip montage animation finishes.
+	 *  Broadcasts the `OnEquipWeaponEnd` event.
+	 *  @param Montage - The animation montage that completed.
+	 *  @param bInterrupted - Whether the montage was interrupted.
+	 */
+	UFUNCTION(Category = "Combat|Delegate")
+	void OnEquipMontageEnded(UAnimMontage* Montage, bool bInterrupted) const;
+
+	/**
+	 *  Callback function triggered when the unequip montage animation finishes.
+	 *  Broadcasts the `OnUnEquipWeaponEnd` event.
+	 *  @param Montage - The animation montage that completed.
+	 *  @param bInterrupted - Whether the montage was interrupted.
+	 */
+	UFUNCTION(Category = "Combat|Delegate")
+	void OnUnEquipMontageEnded(UAnimMontage* Montage, bool bInterrupted) const;
+
 	/**
 	 *  Callback function triggered when the taking hit montage animation finishes.
 	 *  Broadcasts the `OnTakeHitEnd` event.
 	 *  @param Montage - The animation montage that completed.
 	 *  @param bInterrupted - Whether the montage was interrupted.
-	 */	UFUNCTION(BlueprintCallable, Category = "Combat|Defense")
+	 */
+	UFUNCTION(Category = "Combat|Delegate")
 	void OnTakeHitMontageEnded(UAnimMontage* Montage, bool bInterrupted) const;
 };

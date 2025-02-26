@@ -29,13 +29,13 @@ ANPCCharacterBase::ANPCCharacterBase()
 
 	// Combat component
 	CombatComponent = CreateDefaultSubobject<UMyCombatComponent>("CombatComponent");
-	CombatComponent->FOnDamageReactEvent.AddDynamic(this, &ANPCCharacterBase::OnDamageReactEventHandler);
-	CombatComponent->FOnDamageBlockedEvent.AddDynamic(this, &ANPCCharacterBase::OnDamageBlockedEventHandler);
-	CombatComponent->FOnTakeHitEndEvent.AddDynamic(this, &ANPCCharacterBase::OnTakeHitEndEventHandler);
+	CombatComponent->OnDamageReact.AddDynamic(this, &ANPCCharacterBase::OnDamageReactHandler);
+	CombatComponent->OnDamageBlocked.AddDynamic(this, &ANPCCharacterBase::OnDamageBlockedHandler);
+	CombatComponent->OnTakeHitEnd.AddDynamic(this, &ANPCCharacterBase::OnTakeHitEndHandler);
 
 	// Health component
 	HealthComponent = CreateDefaultSubobject<UMyHealthComponent>("HealthComponent");
-	HealthComponent->FOnDeathEvent.AddDynamic(this, &ANPCCharacterBase::OnDeathEventHandler);
+	HealthComponent->OnDeath.AddDynamic(this, &ANPCCharacterBase::OnDeathHandler);
 }
 
 // Called when the game starts or when spawned
@@ -100,7 +100,7 @@ void ANPCCharacterBase::GetCombatRange_Implementation(float& OutAttackRadius, fl
 	}
 }
 
-void ANPCCharacterBase::OnDamageReactEventHandler_Implementation(EDamageReact DamageReaction)
+void ANPCCharacterBase::OnDamageReactHandler_Implementation(EDamageReact DamageReaction)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Damage reaction %d received"), static_cast<uint8>(DamageReaction));
 	
@@ -124,7 +124,7 @@ void ANPCCharacterBase::OnDamageReactEventHandler_Implementation(EDamageReact Da
 	}
 }
 
-void ANPCCharacterBase::OnTakeHitEndEventHandler()
+void ANPCCharacterBase::OnTakeHitEndHandler()
 {
 	// Update behavior tree to attacking
 	if (ANPCAIController* AIController = Cast<ANPCAIController>(GetInstigatorController()))
@@ -134,7 +134,7 @@ void ANPCCharacterBase::OnTakeHitEndEventHandler()
 	}
 }
 
-void ANPCCharacterBase::OnDamageBlockedEventHandler()
+void ANPCCharacterBase::OnDamageBlockedHandler()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Damage blocked"));
 }
@@ -193,7 +193,7 @@ bool ANPCCharacterBase::IsDead_Implementation()
 	return !HealthComponent->IsAlive();
 }
 
-void ANPCCharacterBase::OnDeathEventHandler_Implementation()
+void ANPCCharacterBase::OnDeathHandler_Implementation()
 {
 	// Stop AI logic if the actor has an AI controller
 	if (const ANPCAIController* AIController = Cast<ANPCAIController>(GetInstigatorController()))

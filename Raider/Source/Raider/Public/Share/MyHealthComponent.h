@@ -64,16 +64,6 @@ public:
 
 /**
  *  -----------------------------------------
- *  Delegates
- *  -----------------------------------------
- */
-public:
-	/** Delegate event triggered when the character dies */
-	UPROPERTY(BlueprintAssignable, Category = "Health")
-	FOnDeath FOnDeathEvent;
-
-/**
- *  -----------------------------------------
  *  Animations
  *  -----------------------------------------
  */	
@@ -90,4 +80,14 @@ public:
 	 */
 	UFUNCTION()
 	void PlayDeathRagDoll() const;
+
+/**
+ *  -----------------------------------------
+ *  Delegate Events
+ *  -----------------------------------------
+ */
+public:
+	/** Delegate event triggered when the character dies */
+	UPROPERTY(BlueprintAssignable, Category = "Health")
+	FOnDeath OnDeath;
 };

@@ -58,12 +58,6 @@ public:
 	void GetCombatRange(float& OutAttackRadius, float& OutDefendRadius);
 	virtual void GetCombatRange_Implementation(float& OutAttackRadius, float& OutDefendRadius);
 
-	/** 
-	 *  Apply necessary logic when character get damaged 
-	 */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void OnDamageReactEventHandler(EDamageReact DamageReaction);
-
 /**
  *	------------------------------
  *  Health
@@ -104,12 +98,6 @@ public:
 	 */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	bool IsDead();
-
-	/** 
-	 *  Apply necessary death logic when character is dead 
-	 */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void OnDeathEventHandler();
 	
 /**
  *	------------------------------
@@ -131,4 +119,22 @@ public:
 	 */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	float SetMovementSpeed(ECharacterMovementState InMovementState);
+
+/**
+ *	------------------------------
+ *  Delegate Events
+ *	------------------------------	
+ */
+public:
+	/** 
+	 *  Apply necessary death logic when character is dead 
+	 */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void OnDeathHandler();
+
+	/** 
+	 *  Apply necessary logic when character get damaged 
+	 */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void OnDamageReactHandler(EDamageReact DamageReaction);
 };
