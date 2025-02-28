@@ -68,11 +68,30 @@ bool ANPCCharacterBase::IsWeaponEquipped_Implementation()
 	return CombatComponent->IsWeaponEquipped;
 }
 
-void ANPCCharacterBase::Attack_Implementation()
+void ANPCCharacterBase::Attack_Implementation(AActor* AttackTarget)
 {
+	if (!AttackTarget) return;
+	
 	if (CombatComponent)
 	{
-		CombatComponent->Attack();
+		CombatComponent->Attack(AttackTarget);
+	}
+}
+
+bool ANPCCharacterBase::RequestAttackToken_Implementation(AActor* RequestingAttacker, const int Amount)
+{
+	if (!HealthComponent)
+	{
+		return true;
+	}
+	return HealthComponent->RequestAttackToken(RequestingAttacker, Amount);
+}
+
+void ANPCCharacterBase::ReturnAttackToken_Implementation(AActor* RequestingAttacker, const int Amount)
+{
+	if (HealthComponent)
+	{
+		HealthComponent->ReturnAttackToken(RequestingAttacker, Amount);
 	}
 }
 

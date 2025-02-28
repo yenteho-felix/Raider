@@ -47,8 +47,25 @@ public:
 
 	/** Called when the NPC performs an attack. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void Attack();
+	void Attack(AActor* AttackTarget);
 
+	/**
+	 * Attempts to reserve attack tokens for an attacking entity.
+	 * @param RequestingAttacker - The entity requesting attack permission.
+	 * @param Amount - The number of attack tokens to request.
+	 * @return True if tokens were successfully granted, false otherwise.
+	 */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	bool RequestAttackToken(AActor* RequestingAttacker, int Amount);
+
+	/**
+	 * Releases attack tokens after an attacker disengages.
+	 * @param RequestingAttacker - The entity returning the attack token.
+	 * @param Amount - The number of tokens being returned.
+	 */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void ReturnAttackToken(AActor* RequestingAttacker, int Amount);
+	
 	/**
 	 *  Retrieves the combat range of the NPC. Add Default C++ implementation.
 	 *  @param OutAttackRadius - The distance within which the NPC can attack.

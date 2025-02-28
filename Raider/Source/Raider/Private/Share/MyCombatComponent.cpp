@@ -3,18 +3,21 @@
 
 #include "Share/MyCombatComponent.h"
 
+#include "DelayAction.h"
+#include "TimerManager.h"
+#include "Share/MyCombatInterface.h"
 #include "Share/Struct/FSDamageInfo.h"
 #include "Weapon/WeaponBase.h"
 
 
 // Sets default values for this component's properties
-UMyCombatComponent::UMyCombatComponent():
-	IsWeaponEquipped(false),
-	AttackRadius(0),
-	DefendRadius(0),
-	bIsInvincible(false),
-	bIsBlocking(false),
-	bIsInterruptible(true)
+UMyCombatComponent::UMyCombatComponent()
+	: IsWeaponEquipped(false),
+	  AttackRadius(150),
+	  DefendRadius(250),
+	  bIsInvincible(false),
+	  bIsBlocking(false),
+	  bIsInterruptible(true)
 {
 	PrimaryComponentTick.bCanEverTick = false;
 }
@@ -24,7 +27,6 @@ UMyCombatComponent::UMyCombatComponent():
 void UMyCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 void UMyCombatComponent::EquipWeapon()
@@ -143,11 +145,29 @@ void UMyCombatComponent::GetCombatRange(float& OutAttackRadius, float& OutDefend
 	OutDefendRadius = DefendRadius;
 }
 
-void UMyCombatComponent::Attack()
+void UMyCombatComponent::Attack(AActor* AttackTarget)
 {
-	if (const AActor* Owner = GetOwner())
+	AActor* Owner = GetOwner();
+
+	if (!Owner) return;
+	
+	// Check if the attack target implements the interface
+	if (AttackTarget->GetClass()->ImplementsInterface(UMyCombatInterface::StaticClass()))
 	{
-		PlayAttackMontage(AttackMontage);
+		if (IMyCombatInterface::Execute_RequestAttackToken(AttackTarget, Owner, 1))
+		{
+			CurrentAttackTarget = AttackTarget;
+			PlayAttackMontage(AttackMontage);
+		}
+		else
+		{
+			// Add a tick delay before calling TriggerOnAttackEnd()
+			GetWorld()->GetTimerManager().SetTimerForNextTick(this, &UMyCombatComponent::TriggerOnAttackEnd);
+		}	
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s is does not implement the combat interface!"), *AttackTarget->GetName());
 	}
 }
 
@@ -164,6 +184,10 @@ void UMyCombatComponent::PlayAttackMontage(UAnimMontage* AnimMontage)
 		{
 			if (UAnimInstance* AnimInstance = MeshComponent->GetAnimInstance())
 			{
+				// Bind to montage notify
+				FPlayMontageAnimNotifyDelegate NotifyBeginDelegate;
+				NotifyBeginDelegate.AddDynamic(this, &UMyCombatComponent::OnAttackMontageNotifyBegin);
+				
 				AnimInstance->Montage_Play(AnimMontage);
 				
 				// Bind to montage end event
@@ -175,7 +199,30 @@ void UMyCombatComponent::PlayAttackMontage(UAnimMontage* AnimMontage)
 	}
 }
 
-void UMyCombatComponent::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted) const
+void UMyCombatComponent::ReturnAttackToken(AActor* AttackTarget, int32 Amount)
+{
+	AActor* Owner = GetOwner();
+
+	if (!Owner || !AttackTarget) return;
+	
+	if (AttackTarget->GetClass()->ImplementsInterface(UMyCombatInterface::StaticClass()))
+	{
+		IMyCombatInterface::Execute_ReturnAttackToken(AttackTarget, Owner, Amount);
+	}
+}
+
+void UMyCombatComponent::OnAttackMontageNotifyBegin(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload)
+{
+	OnAttackMontageNotify.Broadcast(NotifyName);
+}
+
+void UMyCombatComponent::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	ReturnAttackToken(CurrentAttackTarget, 1);
+	TriggerOnAttackEnd();
+}
+
+void UMyCombatComponent::TriggerOnAttackEnd() const
 {
 	OnAttackEnd.Broadcast();
 }

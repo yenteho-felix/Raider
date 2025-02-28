@@ -59,7 +59,15 @@ public:
 	
 	/** NPCCombatInterface, attack function */
 	UFUNCTION(Category = "NPC")
-	virtual void Attack_Implementation() override;
+	virtual void Attack_Implementation(AActor* AttackTarget) override;
+
+	/** NPCCombatInterface, request token */
+	UFUNCTION(Category = "NPC")
+	virtual bool RequestAttackToken_Implementation(AActor* RequestingAttacker, const int Amount) override;
+	
+	/** NPCCombatInterface, return token */
+	UFUNCTION(Category = "NPC")
+	virtual void ReturnAttackToken_Implementation(AActor* RequestingAttacker, const int Amount) override;
 
 	/** NPCCombatInterface, equip function */
 	UFUNCTION(Category = "NPC")
@@ -73,6 +81,12 @@ public:
 	UFUNCTION(Category = "NPC")
 	virtual void GetCombatRange_Implementation(float& OutAttackRadius, float& OutDefendRadius) override;
 	
+private:
+	/**
+	 *  Variable to store current attack target passing from Attack() function
+	 */
+	UPROPERTY()
+	AActor* CurrentAttackTarget;
 /**
  *	---------------------------------------------
  *  Health Component & Interface

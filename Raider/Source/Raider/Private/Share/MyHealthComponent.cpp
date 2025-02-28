@@ -5,14 +5,12 @@
 
 // Sets default values for this component's properties
 UMyHealthComponent::UMyHealthComponent()
+	: AttackTokenCount(1),
+      MaxHealth(100),
+      Health(100)
 {
 	PrimaryComponentTick.bCanEverTick = false;
-
-	// Initialize health
-	MaxHealth = 100;
-	Health = MaxHealth;
 }
-
 
 // Called when the game starts
 void UMyHealthComponent::BeginPlay()
@@ -53,6 +51,33 @@ void UMyHealthComponent::TakeDamage(const float Amount)
 bool UMyHealthComponent::IsAlive() const
 {
 	return Health > 0;
+}
+
+bool UMyHealthComponent::RequestAttackToken(AActor* RequestingAttacker, const int32 Amount)
+{
+	if (!RequestingAttacker || AttackTokenCount < Amount)
+	{
+		return false;
+	}
+
+	// Ensure the attacker is not already in the list
+	if (!Attackers.Contains(RequestingAttacker))
+	{
+		AttackTokenCount -= Amount;
+		Attackers.Add(RequestingAttacker);
+		return true;
+	}
+
+	return false;
+}
+
+void UMyHealthComponent::ReturnAttackToken(AActor* RequestingAttacker, const int32 Amount)
+{
+	if (Attackers.Contains(RequestingAttacker))
+	{
+		AttackTokenCount += Amount;
+		Attackers.Remove(RequestingAttacker);
+	}
 }
 
 void UMyHealthComponent::PlayDeathMontage(UAnimMontage* AnimMontage) const
