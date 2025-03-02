@@ -147,14 +147,6 @@ protected:
 	UFUNCTION(Category = "Combat|Attack")
 	void PlayAttackMontage(UAnimMontage* AnimMontage);
 
-	/**
-	 * Return token back to the attack target
-	 * @param AttackTarget - Actor who the token will return to 
-	 * @param Amount       - The amount of token to be return
-	 */
-	UFUNCTION(Category = "Combat|Attack")
-	void ReturnAttackToken(AActor* AttackTarget, int32 Amount);
-
 private:
 	/** Local variable to store attack target */
 	UPROPERTY()

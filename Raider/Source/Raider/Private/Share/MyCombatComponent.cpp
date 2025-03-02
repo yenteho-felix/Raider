@@ -150,25 +150,28 @@ void UMyCombatComponent::Attack(AActor* AttackTarget)
 	AActor* Owner = GetOwner();
 
 	if (!Owner) return;
-	
-	// Check if the attack target implements the interface
-	if (AttackTarget->GetClass()->ImplementsInterface(UMyCombatInterface::StaticClass()))
-	{
-		if (IMyCombatInterface::Execute_RequestAttackToken(AttackTarget, Owner, 1))
-		{
-			CurrentAttackTarget = AttackTarget;
-			PlayAttackMontage(AttackMontage);
-		}
-		else
-		{
-			// Add a tick delay before calling TriggerOnAttackEnd()
-			GetWorld()->GetTimerManager().SetTimerForNextTick(this, &UMyCombatComponent::TriggerOnAttackEnd);
-		}	
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("%s is does not implement the combat interface!"), *AttackTarget->GetName());
-	}
+
+	PlayAttackMontage(AttackMontage);
+
+	// Disable this since we move the token request to AI behavior tree
+	// // Check if the attack target implements the interface
+	// if (AttackTarget->GetClass()->ImplementsInterface(UMyCombatInterface::StaticClass()))
+	// {
+	// 	if (IMyCombatInterface::Execute_RequestAttackToken(AttackTarget, Owner, 1))
+	// 	{
+	// 		CurrentAttackTarget = AttackTarget;
+	// 		PlayAttackMontage(AttackMontage);
+	// 	}
+	// 	else
+	// 	{
+	// 		// Delay execution by one tick to allow event listeners to bind
+	// 		GetWorld()->GetTimerManager().SetTimerForNextTick(this, &UMyCombatComponent::TriggerOnAttackEnd);
+	// 	}	
+	// }
+	// else
+	// {
+	// 	UE_LOG(LogTemp, Error, TEXT("%s is does not implement the combat interface!"), *AttackTarget->GetName());
+	// }
 }
 
 void UMyCombatComponent::PlayAttackMontage(UAnimMontage* AnimMontage)
@@ -199,18 +202,6 @@ void UMyCombatComponent::PlayAttackMontage(UAnimMontage* AnimMontage)
 	}
 }
 
-void UMyCombatComponent::ReturnAttackToken(AActor* AttackTarget, int32 Amount)
-{
-	AActor* Owner = GetOwner();
-
-	if (!Owner || !AttackTarget) return;
-	
-	if (AttackTarget->GetClass()->ImplementsInterface(UMyCombatInterface::StaticClass()))
-	{
-		IMyCombatInterface::Execute_ReturnAttackToken(AttackTarget, Owner, Amount);
-	}
-}
-
 void UMyCombatComponent::OnAttackMontageNotifyBegin(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload)
 {
 	OnAttackMontageNotify.Broadcast(NotifyName);
@@ -218,7 +209,6 @@ void UMyCombatComponent::OnAttackMontageNotifyBegin(FName NotifyName, const FBra
 
 void UMyCombatComponent::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	ReturnAttackToken(CurrentAttackTarget, 1);
 	TriggerOnAttackEnd();
 }
 
