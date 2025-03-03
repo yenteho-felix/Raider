@@ -6,6 +6,7 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
+#include "Kismet/GameplayStatics.h"
 #include "NPC/NPCCharacterBase.h"
 #include "Perception/AISenseConfig_Damage.h"
 #include "Perception/AISenseConfig_Hearing.h"
@@ -141,19 +142,19 @@ void ANPCAIController::OnPerceptionUpdated(const TArray<AActor*>& UpdatedActors)
 
 			if (CanSenseActor(Actor, EAISense::Sight,Stimulus))
 			{
-				UE_LOG(LogTemp, Warning, TEXT("%s AI Sees Actor: %s"), *OwnerCharacter->GetName(), *Actor->GetName());
+				//UE_LOG(LogTemp, Warning, TEXT("%s AI Sees Actor: %s"), *OwnerCharacter->GetName(), *Actor->GetName());
 				HandleSenseSight(Actor);
 			}
 
 			if (CanSenseActor(Actor, EAISense::Hearing, Stimulus))
 			{
-				UE_LOG(LogTemp, Warning, TEXT("%s AI Heard Actor: %s"), *OwnerCharacter->GetName(), *Actor->GetName());
+				//UE_LOG(LogTemp, Warning, TEXT("%s AI Heard Actor: %s"), *OwnerCharacter->GetName(), *Actor->GetName());
 				HandleSenseSound(Stimulus.StimulusLocation);
 			}
 
 			if (CanSenseActor(Actor, EAISense::Damage, Stimulus))
 			{
-				UE_LOG(LogTemp, Warning, TEXT("%s AI Detected Damage from Actor: %s"), *OwnerCharacter->GetName(), *Actor->GetName());
+				//UE_LOG(LogTemp, Warning, TEXT("%s AI Detected Damage from Actor: %s"), *OwnerCharacter->GetName(), *Actor->GetName());
 				HandleSenseDamage(Actor);
 			}
 		}
@@ -185,6 +186,9 @@ bool ANPCAIController::CanSenseActor(AActor* Actor, const EAISense SenseType, FA
 
 void ANPCAIController::HandleSenseSight(AActor* TargetActor)
 {
+	// if (TargetActor != UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
+	// 	return;
+	
 	EAIState CurrentState = GetCurrentState();
 	if (CurrentState == EAIState::Passive || CurrentState == EAIState::Investigating)
 	{
