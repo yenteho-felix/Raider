@@ -55,20 +55,23 @@ bool UMyHealthComponent::IsAlive() const
 
 bool UMyHealthComponent::RequestAttackToken(AActor* RequestingAttacker, const int32 Amount)
 {
-	if (!RequestingAttacker || AttackTokenCount < Amount)
-	{
+	if (!RequestingAttacker)
 		return false;
-	}
 
-	// Ensure the attacker is not already in the list
-	if (!Attackers.Contains(RequestingAttacker))
-	{
-		AttackTokenCount -= Amount;
-		Attackers.Add(RequestingAttacker);
+	// If Requesting attacker has token already, return true to prevent token loss
+	if (Attackers.Contains(RequestingAttacker))
 		return true;
-	}
 
-	return false;
+	// Prevent exceeding available tokens
+	if (AttackTokenCount < Amount)
+		return false;
+	
+	// Assign token
+	AttackTokenCount -= Amount;
+	Attackers.Add(RequestingAttacker);
+	UE_LOG(LogTemp, Warning, TEXT("%s give token to %s"), *GetOwner()->GetName(), *RequestingAttacker->GetName());
+	
+	return true;
 }
 
 void UMyHealthComponent::ReturnAttackToken(AActor* RequestingAttacker, const int32 Amount)
@@ -77,6 +80,7 @@ void UMyHealthComponent::ReturnAttackToken(AActor* RequestingAttacker, const int
 	{
 		AttackTokenCount += Amount;
 		Attackers.Remove(RequestingAttacker);
+		UE_LOG(LogTemp, Warning, TEXT("%s received token from %s"), *GetOwner()->GetName(), *RequestingAttacker->GetName());
 	}
 }
 
