@@ -10,8 +10,11 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Materials/Material.h"
 #include "Engine/World.h"
+#include "Share/MyCombatComponent.h"
+#include "Share/MyHealthComponent.h"
 
 ARaiderCharacter::ARaiderCharacter()
+	: AttackTokenCount(1)
 {
 	// Set size for player capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -43,9 +46,31 @@ ARaiderCharacter::ARaiderCharacter()
 	// Activate ticking in order to update the cursor every frame.
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
+
+	// Combat Component
+	HealthComponent = CreateDefaultSubobject<UMyHealthComponent>("HealthComponent");
+	HealthComponent->AttackTokenCount = AttackTokenCount;
+	
 }
 
 void ARaiderCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+}
+
+bool ARaiderCharacter::RequestAttackToken_Implementation(AActor* RequestingAttacker, const int Amount)
+{
+	if (!HealthComponent)
+	{
+		return true;
+	}
+	return HealthComponent->RequestAttackToken(RequestingAttacker, Amount);
+}
+
+void ARaiderCharacter::ReturnAttackToken_Implementation(AActor* RequestingAttacker, const int Amount)
+{
+	if (HealthComponent)
+	{
+		HealthComponent->ReturnAttackToken(RequestingAttacker, Amount);
+	}
 }

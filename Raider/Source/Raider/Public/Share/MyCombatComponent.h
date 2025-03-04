@@ -15,6 +15,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEquipWeaponEnd);
 /** Delegate to notify subscribers when weapon un-equip process is completed */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUnEquipWeaponEnd);
 
+/** Delegate to notify subscribers the attack montage notify is issued */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttackMontageNotify, FName, NotifyName);
+
 /** Delegate to notify subscribers when attack process is completed */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttackEnd);
 
@@ -109,6 +112,10 @@ protected:
  *  ---------------------------------------------
  */
 public:
+	/** Variable to store attack target */
+	UPROPERTY()
+	AActor* CurrentAttackTarget;
+	
 	/** Animation montage played when the NPC performs an attack */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Attack")
 	TObjectPtr<UAnimMontage> AttackMontage;
@@ -129,17 +136,24 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat|Attack")
 	void GetCombatRange(float& OutAttackRadius, float& OutDefendRadius) const;
 
-	/** Executes the NPC's attack behavior */
+	/**
+	 * Executes the NPC's attack behavior
+	 * @param AttackTarget - Attack target actor
+	 */
 	UFUNCTION(BlueprintCallable, Category = "Combat|Attack")
-	void Attack();
+	void Attack(AActor* AttackTarget);
 
 protected:
 	/**
 	 *  Plays the attack montage animation.
 	 *  @param AnimMontage - The montage to play for attacking.
 	 */
-	UFUNCTION()
+	UFUNCTION(Category = "Combat|Attack")
 	void PlayAttackMontage(UAnimMontage* AnimMontage);
+
+private:
+	/** Ensures OnPlayMontageNotifyBegin is only bound once. */
+	bool bIsNotifyBound = false;
 	
 /**
  *	---------------------------------------------
@@ -213,6 +227,10 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Combat|Delegate")
 	FOnAttackEnd OnAttackEnd;
 
+	/** Event triggered when attack montage notify issued */
+	UPROPERTY(BlueprintAssignable, Category = "Combat|Delegate")
+	FOnAttackMontageNotify OnAttackMontageNotify;
+
 public:
 	/**
 	 *  Callback function triggered when the attack montage animation finishes.
@@ -220,9 +238,12 @@ public:
 	 *  @param bInterrupted - Whether the montage was interrupted.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Combat|Delegate")
-	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted) const;
+	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	
 protected:
+	UFUNCTION(Category = "Combat|Delegate")
+	void OnAttackMontageNotifyBegin(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload);
+	
 	/**
 	 *  Callback function triggered when the equip montage animation finishes.
 	 *  Broadcasts the `OnEquipWeaponEnd` event.
@@ -249,4 +270,9 @@ protected:
 	 */
 	UFUNCTION(Category = "Combat|Delegate")
 	void OnTakeHitMontageEnded(UAnimMontage* Montage, bool bInterrupted) const;
+
+public:
+	/** Broadcast OnAttackEnd */
+	UFUNCTION(Blueprintable, Category = "Combat|Delegate")
+	void TriggerOnAttackEnd();
 };

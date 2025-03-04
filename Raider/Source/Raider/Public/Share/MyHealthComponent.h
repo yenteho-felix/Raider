@@ -62,6 +62,38 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	bool IsAlive() const;
 
+
+/**
+ *  --------------------------------------------
+ *  Token system
+ *  --------------------------------------------
+ */
+public:
+	/** The attack token available for the owning character to request */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health|Token")
+	int32 AttackTokenCount;
+
+	/** List of attackers who currently hold attack tokens */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health|Token")
+	TArray<AActor*> Attackers;
+	
+	/**
+	 * Attempts to reserve attack tokens for an attacking entity.
+	 * @param RequestingAttacker - The entity requesting attack permission.
+	 * @param Amount - The number of attack tokens to request.
+	 * @return True if tokens were successfully granted, false otherwise.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Health|Token")
+	bool RequestAttackToken(AActor* RequestingAttacker, const int32 Amount);
+
+	/**
+	 * Releases attack tokens after an attacker disengages.
+	 * @param RequestingAttacker - The entity returning the attack token.
+	 * @param Amount - The number of tokens being returned.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Health|Token")
+	void ReturnAttackToken(AActor* RequestingAttacker, const int32 Amount);
+	
 /**
  *  -----------------------------------------
  *  Animations

@@ -68,11 +68,30 @@ bool ANPCCharacterBase::IsWeaponEquipped_Implementation()
 	return CombatComponent->IsWeaponEquipped;
 }
 
-void ANPCCharacterBase::Attack_Implementation()
+void ANPCCharacterBase::Attack_Implementation(AActor* AttackTarget)
 {
+	if (!AttackTarget) return;
+	
 	if (CombatComponent)
 	{
-		CombatComponent->Attack();
+		CombatComponent->Attack(AttackTarget);
+	}
+}
+
+bool ANPCCharacterBase::RequestAttackToken_Implementation(AActor* RequestingAttacker, const int Amount)
+{
+	if (!HealthComponent)
+	{
+		return true;
+	}
+	return HealthComponent->RequestAttackToken(RequestingAttacker, Amount);
+}
+
+void ANPCCharacterBase::ReturnAttackToken_Implementation(AActor* RequestingAttacker, const int Amount)
+{
+	if (HealthComponent)
+	{
+		HealthComponent->ReturnAttackToken(RequestingAttacker, Amount);
 	}
 }
 
@@ -102,7 +121,7 @@ void ANPCCharacterBase::GetCombatRange_Implementation(float& OutAttackRadius, fl
 
 void ANPCCharacterBase::OnDamageReactHandler_Implementation(EDamageReact DamageReaction)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Damage reaction %d received"), static_cast<uint8>(DamageReaction));
+	UE_LOG(LogTemp, Warning, TEXT("%s is taking damage of type EDamageReact[%d]"), *GetName(), static_cast<uint8>(DamageReaction));
 	
 	// Stop movement
 	GetCharacterMovement()->StopMovementImmediately();
@@ -168,20 +187,20 @@ void ANPCCharacterBase::TakeHealing_Implementation(const float Amount)
 
 bool ANPCCharacterBase::TakeDamage_Implementation(const FSDamageInfo& DamageInfo)
 {
-	if (!HealthComponent)
+	if (!HealthComponent || !CombatComponent)
 	{
 		return false;
 	}
-
+	
 	// Check if combat logic allows damage to be applied
-	if (CombatComponent && !CombatComponent->ShouldProcessDamage(DamageInfo))
+	if (CombatComponent->ShouldProcessDamage(DamageInfo))
 	{
-		return false;
+		// Apply damage to health
+		HealthComponent->TakeDamage(DamageInfo.Amount);
+		return true;
 	}
 
-	// Apply damage to health
-	HealthComponent->TakeDamage(DamageInfo.Amount);
-	return true;
+	return false;
 }
 
 bool ANPCCharacterBase::IsDead_Implementation()
@@ -195,6 +214,16 @@ bool ANPCCharacterBase::IsDead_Implementation()
 
 void ANPCCharacterBase::OnDeathHandler_Implementation()
 {
+	// Return attack token
+	if (CombatComponent && CombatComponent->CurrentAttackTarget)
+	{
+		AActor* AttackTarget = CombatComponent->CurrentAttackTarget;
+		if (AttackTarget->GetClass()->ImplementsInterface(UMyCombatInterface::StaticClass()))
+		{
+			IMyCombatInterface::Execute_ReturnAttackToken(AttackTarget, this, 1);
+		}
+	}
+	
 	// Stop AI logic if the actor has an AI controller
 	if (const ANPCAIController* AIController = Cast<ANPCAIController>(GetInstigatorController()))
 	{
