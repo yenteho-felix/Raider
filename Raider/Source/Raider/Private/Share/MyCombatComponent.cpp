@@ -153,6 +153,8 @@ void UMyCombatComponent::Attack(AActor* AttackTarget)
 
 	PlayAttackMontage(AttackMontage);
 
+	CurrentAttackTarget = AttackTarget;
+
 	// Disable this since we move the token request to AI behavior tree
 	// // Check if the attack target implements the interface
 	// if (AttackTarget->GetClass()->ImplementsInterface(UMyCombatInterface::StaticClass()))
@@ -187,9 +189,13 @@ void UMyCombatComponent::PlayAttackMontage(UAnimMontage* AnimMontage)
 		{
 			if (UAnimInstance* AnimInstance = MeshComponent->GetAnimInstance())
 			{
-				// Bind to montage notify
-				FPlayMontageAnimNotifyDelegate NotifyBeginDelegate;
-				NotifyBeginDelegate.AddDynamic(this, &UMyCombatComponent::OnAttackMontageNotifyBegin);
+				// Ensure binding happens only once
+				if (!bIsNotifyBound)
+				{
+					// Bind to montage notify
+					AnimInstance->OnPlayMontageNotifyBegin.AddDynamic(this, &UMyCombatComponent::OnAttackMontageNotifyBegin);
+					bIsNotifyBound = true;
+				}
 				
 				AnimInstance->Montage_Play(AnimMontage);
 				
@@ -212,8 +218,9 @@ void UMyCombatComponent::OnAttackMontageEnded(UAnimMontage* Montage, bool bInter
 	TriggerOnAttackEnd();
 }
 
-void UMyCombatComponent::TriggerOnAttackEnd() const
+void UMyCombatComponent::TriggerOnAttackEnd()
 {
+	CurrentAttackTarget = nullptr;
 	OnAttackEnd.Broadcast();
 }
 

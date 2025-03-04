@@ -112,6 +112,10 @@ protected:
  *  ---------------------------------------------
  */
 public:
+	/** Variable to store attack target */
+	UPROPERTY()
+	AActor* CurrentAttackTarget;
+	
 	/** Animation montage played when the NPC performs an attack */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Attack")
 	TObjectPtr<UAnimMontage> AttackMontage;
@@ -148,9 +152,8 @@ protected:
 	void PlayAttackMontage(UAnimMontage* AnimMontage);
 
 private:
-	/** Local variable to store attack target */
-	UPROPERTY()
-	AActor* CurrentAttackTarget;
+	/** Ensures OnPlayMontageNotifyBegin is only bound once. */
+	bool bIsNotifyBound = false;
 	
 /**
  *	---------------------------------------------
@@ -271,5 +274,5 @@ protected:
 public:
 	/** Broadcast OnAttackEnd */
 	UFUNCTION(Blueprintable, Category = "Combat|Delegate")
-	void TriggerOnAttackEnd() const;
+	void TriggerOnAttackEnd();
 };
