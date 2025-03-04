@@ -14,6 +14,7 @@
 
 // Sets default values
 ANPCCharacterBase::ANPCCharacterBase()
+	: TeamNumber(1)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -56,6 +57,11 @@ void ANPCCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+int32 ANPCCharacterBase::GetTeamNumber_Implementation()
+{
+	return TeamNumber;
 }
 
 bool ANPCCharacterBase::IsWeaponEquipped_Implementation()

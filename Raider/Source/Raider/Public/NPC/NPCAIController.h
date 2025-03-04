@@ -105,7 +105,7 @@ private:
 
 	/** Handles AI response to sight perception */
 	UFUNCTION()
-	void HandleSenseSight(AActor* TargetActor);
+	void HandleSenseSight(AActor* Actor);
 
 	/** Handles AI response to sound perception */
 	UFUNCTION()
@@ -114,4 +114,12 @@ private:
 	/** Handles AI response to detecting damage */
 	UFUNCTION()
 	void HandleSenseDamage(AActor* Actor);
+
+/**
+ *  ------------------------------
+ *  Team
+ *  ------------------------------
+ */
+	UFUNCTION()
+	bool IsOnSameTeam(AActor* OtherActor) const;
 };

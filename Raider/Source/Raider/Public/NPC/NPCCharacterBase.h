@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GenericTeamAgentInterface.h"
 #include "Share/MyCombatInterface.h"
 #include "GameFramework/Character.h"
 #include "NPCCharacterBase.generated.h"
@@ -42,6 +43,20 @@ public:
 	/** Each AI Character type can assign a unique behavior tree, which can be retrieved from AI Controller */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NPC|AIController")
 	TObjectPtr<UBehaviorTree> BehaviorTreeAsset;
+
+/**
+ *	---------------------------------------------
+ *  Team
+ *  ---------------------------------------------
+ */
+	/** NPCCombatInterface, return team number */
+	UFUNCTION(Category = "Player")
+	virtual int32 GetTeamNumber_Implementation() override;
+
+private:
+	/** Default team number */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Team", meta = (AllowPrivateAccess = "true"))
+	int32 TeamNumber;
 	
 /**
  *	---------------------------------------------

@@ -14,7 +14,8 @@
 #include "Share/MyHealthComponent.h"
 
 ARaiderCharacter::ARaiderCharacter()
-	: AttackTokenCount(1)
+	: AttackTokenCount(1),
+	  TeamNumber(255)
 {
 	// Set size for player capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -73,4 +74,9 @@ void ARaiderCharacter::ReturnAttackToken_Implementation(AActor* RequestingAttack
 	{
 		HealthComponent->ReturnAttackToken(RequestingAttacker, Amount);
 	}
+}
+
+int32 ARaiderCharacter::GetTeamNumber_Implementation()
+{
+	return TeamNumber;
 }
