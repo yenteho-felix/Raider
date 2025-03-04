@@ -208,7 +208,7 @@ void ANPCAIController::HandleSenseSound(const FVector& Location) const
 void ANPCAIController::HandleSenseDamage(AActor* Actor)
 {
 	EAIState CurrentState = GetCurrentState();
-	if (CurrentState == EAIState::Passive || CurrentState == EAIState::Investigating)
+	if (CurrentState != EAIState::Dead)
 	{
 		SetStateAsAttacking(Actor);
 	}
