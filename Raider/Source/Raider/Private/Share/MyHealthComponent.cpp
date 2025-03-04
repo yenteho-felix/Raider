@@ -69,7 +69,7 @@ bool UMyHealthComponent::RequestAttackToken(AActor* RequestingAttacker, const in
 	// Assign token
 	AttackTokenCount -= Amount;
 	Attackers.Add(RequestingAttacker);
-	UE_LOG(LogTemp, Warning, TEXT("%s give token to %s"), *GetOwner()->GetName(), *RequestingAttacker->GetName());
+	//UE_LOG(LogTemp, Warning, TEXT("%s give token to %s"), *GetOwner()->GetName(), *RequestingAttacker->GetName());
 	
 	return true;
 }
@@ -80,7 +80,7 @@ void UMyHealthComponent::ReturnAttackToken(AActor* RequestingAttacker, const int
 	{
 		AttackTokenCount += Amount;
 		Attackers.Remove(RequestingAttacker);
-		UE_LOG(LogTemp, Warning, TEXT("%s received token from %s"), *GetOwner()->GetName(), *RequestingAttacker->GetName());
+		//UE_LOG(LogTemp, Warning, TEXT("%s received token from %s"), *GetOwner()->GetName(), *RequestingAttacker->GetName());
 	}
 }
 
