@@ -9,6 +9,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "NPC/NPCAIController.h"
 #include "NPC/Enums/ECharacterMovementState.h"
+#include "Perception/AISense_Damage.h"
 #include "Share/MyCombatComponent.h"
 #include "Share/MyHealthComponent.h"
 
@@ -199,7 +200,7 @@ void ANPCCharacterBase::TakeHealing_Implementation(const float Amount)
 	HealthComponent->TakeHealing(Amount);
 }
 
-bool ANPCCharacterBase::TakeDamage_Implementation(const FSDamageInfo& DamageInfo)
+bool ANPCCharacterBase::TakeDamage_Implementation(AActor* Attacker, const FSDamageInfo& DamageInfo)
 {
 	if (!HealthComponent || !CombatComponent)
 	{
@@ -211,6 +212,17 @@ bool ANPCCharacterBase::TakeDamage_Implementation(const FSDamageInfo& DamageInfo
 	{
 		// Apply damage to health
 		HealthComponent->TakeDamage(DamageInfo.Amount);
+
+		// Report damage event to AI perception system
+		UAISense_Damage::ReportDamageEvent(
+			GetWorld(),
+			GetOwner(),
+			Attacker,
+			DamageInfo.Amount,
+			GetOwner()->GetActorLocation(),
+			Attacker->GetActorLocation()
+		);
+		
 		return true;
 	}
 

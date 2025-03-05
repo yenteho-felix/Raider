@@ -164,7 +164,7 @@ TArray<AActor*> UMyCombatComponent::DamageAllNoneTeamMembers(const TArray<FHitRe
 		// Damage only if the hit actor is on a different team
 		if (OtherTeam != MyTeam)
 		{
-			IMyCombatInterface::Execute_TakeDamage(HitActor, DamageInfo);
+			IMyCombatInterface::Execute_TakeDamage(HitActor, OwnerActor, DamageInfo);
 			DamagedActors.Add(HitActor);
 		}
 	}
@@ -206,7 +206,7 @@ AActor* UMyCombatComponent::DamageFirstNoneTeamMembers(const TArray<FHitResult>&
 		// Damage only if the hit actor is on a different team
 		if (OtherTeam != MyTeam)
 		{
-			IMyCombatInterface::Execute_TakeDamage(HitActor, DamageInfo);
+			IMyCombatInterface::Execute_TakeDamage(HitActor, OwnerActor, DamageInfo);
 			return HitActor;
 		}
 	}

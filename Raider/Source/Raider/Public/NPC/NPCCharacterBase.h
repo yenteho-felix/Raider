@@ -126,7 +126,7 @@ public:
 
 	/** Applies damage to the NPC, reducing its current health */
 	UFUNCTION(Category = "NPC")
-	virtual bool TakeDamage_Implementation(const FSDamageInfo& DamageInfo) override;
+	virtual bool TakeDamage_Implementation(AActor* Attacker, const FSDamageInfo& DamageInfo) override;
 
 	/** Checks if the NPC is dead */
 	UFUNCTION(Category = "NPC")
