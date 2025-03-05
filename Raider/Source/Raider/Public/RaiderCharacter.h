@@ -49,11 +49,20 @@ public:
 	int32 AttackTokenCount;
 
 	/** NPCCombatInterface, request token */
-	UFUNCTION(Category = "NPC")
+	UFUNCTION(Category = "Player")
 	virtual bool RequestAttackToken_Implementation(AActor* RequestingAttacker, int Amount) override;
 
 	/** NPCCombatInterface, return token */
-	UFUNCTION(Category = "NPC")
+	UFUNCTION(Category = "Player")
 	virtual void ReturnAttackToken_Implementation(AActor* RequestingAttacker, const int Amount) override;
+
+	/** NPCCombatInterface, return team number */
+	UFUNCTION(Category = "Player")
+	virtual int32 GetTeamNumber_Implementation() override;
+
+private:
+	/** Default team number */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Team", meta = (AllowPrivateAccess = "true"))
+	int32 TeamNumber;
 };
 

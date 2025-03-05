@@ -14,6 +14,7 @@
 
 // Sets default values
 ANPCCharacterBase::ANPCCharacterBase()
+	: TeamNumber(1)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -29,20 +30,28 @@ ANPCCharacterBase::ANPCCharacterBase()
 
 	// Combat component
 	CombatComponent = CreateDefaultSubobject<UMyCombatComponent>("CombatComponent");
-	CombatComponent->OnDamageReact.AddDynamic(this, &ANPCCharacterBase::OnDamageReactHandler);
-	CombatComponent->OnDamageBlocked.AddDynamic(this, &ANPCCharacterBase::OnDamageBlockedHandler);
-	CombatComponent->OnTakeHitEnd.AddDynamic(this, &ANPCCharacterBase::OnTakeHitEndHandler);
 
 	// Health component
 	HealthComponent = CreateDefaultSubobject<UMyHealthComponent>("HealthComponent");
-	HealthComponent->OnDeath.AddDynamic(this, &ANPCCharacterBase::OnDeathHandler);
+
 }
 
 // Called when the game starts or when spawned
 void ANPCCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	if (CombatComponent)
+	{
+		CombatComponent->OnDamageReact.AddDynamic(this, &ANPCCharacterBase::OnDamageReactHandler);
+		CombatComponent->OnDamageBlocked.AddDynamic(this, &ANPCCharacterBase::OnDamageBlockedHandler);
+		CombatComponent->OnTakeHitEnd.AddDynamic(this, &ANPCCharacterBase::OnTakeHitEndHandler);
+	}
+
+	if (HealthComponent)
+	{
+		HealthComponent->OnDeath.AddDynamic(this, &ANPCCharacterBase::OnDeathHandler);
+	}
 }
 
 // Called every frame
@@ -56,6 +65,11 @@ void ANPCCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+int32 ANPCCharacterBase::GetTeamNumber_Implementation()
+{
+	return TeamNumber;
 }
 
 bool ANPCCharacterBase::IsWeaponEquipped_Implementation()
@@ -121,7 +135,7 @@ void ANPCCharacterBase::GetCombatRange_Implementation(float& OutAttackRadius, fl
 
 void ANPCCharacterBase::OnDamageReactHandler_Implementation(EDamageReact DamageReaction)
 {
-	UE_LOG(LogTemp, Warning, TEXT("%s is taking damage of type EDamageReact[%d]"), *GetName(), static_cast<uint8>(DamageReaction));
+	//UE_LOG(LogTemp, Warning, TEXT("%s is taking damage of type EDamageReact[%d]"), *GetName(), static_cast<uint8>(DamageReaction));
 	
 	// Stop movement
 	GetCharacterMovement()->StopMovementImmediately();

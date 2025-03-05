@@ -23,6 +23,16 @@ class UMyCombatInterface : public UInterface
 class RAIDER_API IMyCombatInterface
 {
 	GENERATED_BODY()
+
+/**
+ *  ------------------------------
+ *  Team
+ *  ------------------------------
+ */
+public:
+	/** Retrieve team number */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	int32 GetTeamNumber();
 	
 /**
  *	------------------------------	

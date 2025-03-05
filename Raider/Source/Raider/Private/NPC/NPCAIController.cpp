@@ -184,15 +184,15 @@ bool ANPCAIController::CanSenseActor(AActor* Actor, const EAISense SenseType, FA
 	return false;
 }
 
-void ANPCAIController::HandleSenseSight(AActor* TargetActor)
+void ANPCAIController::HandleSenseSight(AActor* Actor)
 {
-	// if (TargetActor != UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
-	// 	return;
-	
 	EAIState CurrentState = GetCurrentState();
 	if (CurrentState == EAIState::Passive || CurrentState == EAIState::Investigating)
 	{
-		SetStateAsAttacking(TargetActor);
+		if (!IsOnSameTeam(Actor))
+		{
+			SetStateAsAttacking(Actor);
+		}
 	}
 }
 
@@ -210,6 +210,28 @@ void ANPCAIController::HandleSenseDamage(AActor* Actor)
 	EAIState CurrentState = GetCurrentState();
 	if (CurrentState != EAIState::Dead)
 	{
-		SetStateAsAttacking(Actor);
+		if (!IsOnSameTeam(Actor))
+		{
+			SetStateAsAttacking(Actor);
+		}
 	}
+}
+
+bool ANPCAIController::IsOnSameTeam(AActor* OtherActor) const
+{
+	if (!OtherActor || !OtherActor->GetClass()->ImplementsInterface(UMyCombatInterface::StaticClass()))
+	{
+		return false;
+	}
+
+	const AActor* MyPawn = GetPawn();
+	if (!MyPawn || !MyPawn->GetClass()->ImplementsInterface(UMyCombatInterface::StaticClass()))
+	{
+		return false;
+	}
+	
+	const int32 MyTeam = IMyCombatInterface::Execute_GetTeamNumber(GetPawn());
+	const int32 OtherTeam = IMyCombatInterface::Execute_GetTeamNumber(OtherActor);
+	
+	return (MyTeam == OtherTeam);
 }

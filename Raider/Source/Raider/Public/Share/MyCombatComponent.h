@@ -108,6 +108,22 @@ protected:
 
 /**
  *	---------------------------------------------
+ *  Team
+ *  ---------------------------------------------
+ */
+public:
+	UFUNCTION(BlueprintCallable, Category = "Combat|Team")
+	TArray<AActor*> DamageAllNoneTeamMembers(const TArray<FHitResult>& HitResult, const FSDamageInfo& DamageInfo);
+
+	UFUNCTION(BlueprintCallable, Category = "Combat|Team")
+	AActor* DamageFirstNoneTeamMembers(const TArray<FHitResult>& HitResult, const FSDamageInfo& DamageInfo);
+
+private:
+	UPROPERTY()
+	TArray<AActor*> DamagedActors;
+	
+/**
+ *	---------------------------------------------
  *  Attack
  *  ---------------------------------------------
  */
