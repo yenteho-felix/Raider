@@ -51,7 +51,6 @@ ANPCAIController::ANPCAIController()
 	AIPerceptionComponent->ConfigureSense(*HearingConfig);
 	AIPerceptionComponent->ConfigureSense(*DamageConfig);
 	AIPerceptionComponent->SetDominantSense(SightConfig->GetSenseImplementation());
-	AIPerceptionComponent->OnPerceptionUpdated.AddDynamic(this, &ANPCAIController::OnPerceptionUpdated);
 }
 
 void ANPCAIController::BeginPlay()
@@ -63,6 +62,11 @@ void ANPCAIController::BeginPlay()
 	if (!OwnerCharacter)
 	{
 		return;
+	}
+
+	if (AIPerceptionComponent)
+	{
+		AIPerceptionComponent->OnPerceptionUpdated.AddDynamic(this, &ANPCAIController::OnPerceptionUpdated);
 	}
 	
 	// Run behavior tree
