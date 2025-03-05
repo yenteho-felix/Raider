@@ -172,6 +172,48 @@ TArray<AActor*> UMyCombatComponent::DamageAllNoneTeamMembers(const TArray<FHitRe
 	return DamagedActors;
 }
 
+AActor* UMyCombatComponent::DamageFirstNoneTeamMembers(const TArray<FHitResult>& HitResult, const FSDamageInfo& DamageInfo)
+{
+	// Clear DamagedActors
+	DamagedActors.Empty();
+	
+	// Get team number of the owner
+	int32 MyTeam = 0;
+	AActor* OwnerActor = GetOwner();
+	if (OwnerActor && OwnerActor->GetClass()->ImplementsInterface(UMyCombatInterface::StaticClass()))
+	{
+		MyTeam = IMyCombatInterface::Execute_GetTeamNumber(GetOwner());
+	}
+
+	// Iterate through all hit actors
+	for (const FHitResult& Hit : HitResult)
+	{
+		AActor* HitActor = Hit.GetActor();
+
+		// Skip if invalid or already take damaged
+		if (!HitActor || DamagedActors.Contains(HitActor))
+		{
+			continue;
+		}
+
+		// Get team number of the hit actor
+		int32 OtherTeam = 0;
+		if (HitActor->GetClass()->ImplementsInterface(UMyCombatInterface::StaticClass()))
+		{
+			OtherTeam = IMyCombatInterface::Execute_GetTeamNumber(HitActor);
+		}
+
+		// Damage only if the hit actor is on a different team
+		if (OtherTeam != MyTeam)
+		{
+			IMyCombatInterface::Execute_TakeDamage(HitActor, DamageInfo);
+			return HitActor;
+		}
+	}
+	
+	return nullptr;
+}
+
 void UMyCombatComponent::OnEquipMontageEnded(UAnimMontage* Montage, bool bInterrupted) const
 {
 	OnEquipWeaponEnd.Broadcast();
