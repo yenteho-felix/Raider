@@ -132,6 +132,9 @@ void UMyCombatComponent::PlayUnEquipMontage(UAnimMontage* AnimMontage)
 
 TArray<AActor*> UMyCombatComponent::DamageAllNoneTeamMembers(const TArray<FHitResult>& HitResult, const FSDamageInfo& DamageInfo)
 {
+	// Clear DamagedActors
+	DamagedActors.Empty();
+	
 	// Get team number of the owner
 	int32 MyTeam = 0;
 	AActor* OwnerActor = GetOwner();
