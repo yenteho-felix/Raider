@@ -121,6 +121,9 @@ public:
 private:
 	UPROPERTY()
 	TArray<AActor*> DamagedActors;
+
+	UFUNCTION(BlueprintCallable, Category = "Combat|Team")
+	bool IsOnSameTeam(AActor* OwnerActor, AActor* OtherActor) const;
 	
 /**
  *	---------------------------------------------
