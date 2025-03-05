@@ -30,20 +30,28 @@ ANPCCharacterBase::ANPCCharacterBase()
 
 	// Combat component
 	CombatComponent = CreateDefaultSubobject<UMyCombatComponent>("CombatComponent");
-	CombatComponent->OnDamageReact.AddDynamic(this, &ANPCCharacterBase::OnDamageReactHandler);
-	CombatComponent->OnDamageBlocked.AddDynamic(this, &ANPCCharacterBase::OnDamageBlockedHandler);
-	CombatComponent->OnTakeHitEnd.AddDynamic(this, &ANPCCharacterBase::OnTakeHitEndHandler);
 
 	// Health component
 	HealthComponent = CreateDefaultSubobject<UMyHealthComponent>("HealthComponent");
-	HealthComponent->OnDeath.AddDynamic(this, &ANPCCharacterBase::OnDeathHandler);
+
 }
 
 // Called when the game starts or when spawned
 void ANPCCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	if (CombatComponent)
+	{
+		CombatComponent->OnDamageReact.AddDynamic(this, &ANPCCharacterBase::OnDamageReactHandler);
+		CombatComponent->OnDamageBlocked.AddDynamic(this, &ANPCCharacterBase::OnDamageBlockedHandler);
+		CombatComponent->OnTakeHitEnd.AddDynamic(this, &ANPCCharacterBase::OnTakeHitEndHandler);
+	}
+
+	if (HealthComponent)
+	{
+		HealthComponent->OnDeath.AddDynamic(this, &ANPCCharacterBase::OnDeathHandler);
+	}
 }
 
 // Called every frame
@@ -127,7 +135,7 @@ void ANPCCharacterBase::GetCombatRange_Implementation(float& OutAttackRadius, fl
 
 void ANPCCharacterBase::OnDamageReactHandler_Implementation(EDamageReact DamageReaction)
 {
-	UE_LOG(LogTemp, Warning, TEXT("%s is taking damage of type EDamageReact[%d]"), *GetName(), static_cast<uint8>(DamageReaction));
+	//UE_LOG(LogTemp, Warning, TEXT("%s is taking damage of type EDamageReact[%d]"), *GetName(), static_cast<uint8>(DamageReaction));
 	
 	// Stop movement
 	GetCharacterMovement()->StopMovementImmediately();
