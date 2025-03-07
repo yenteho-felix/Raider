@@ -58,6 +58,7 @@ void ARaiderPlayerController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ARaiderPlayerController::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ARaiderPlayerController::Look);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ARaiderPlayerController::Jump);
+		EnhancedInputComponent->BindAction(LightAttackAction, ETriggerEvent::Triggered, this, &ARaiderPlayerController::LightAttack);
 	}
 	else
 	{
@@ -163,5 +164,13 @@ void ARaiderPlayerController::Jump()
 	if (ACharacter* MyCharacter = Cast<ACharacter>(GetPawn()))
 	{
 		MyCharacter->Jump();
+	}
+}
+
+void ARaiderPlayerController::LightAttack()
+{
+	if (ARaiderCharacter* MyCharacter = Cast<ARaiderCharacter>(GetPawn()))
+	{
+		MyCharacter->LightAttack();
 	}
 }

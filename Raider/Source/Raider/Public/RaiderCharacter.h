@@ -7,6 +7,7 @@
 #include "Share/MyCombatInterface.h"
 #include "RaiderCharacter.generated.h"
 
+class UMyCombatComponent;
 class UMyHealthComponent;
 
 UCLASS(Blueprintable)
@@ -34,6 +35,18 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
 
+	virtual void BeginPlay() override;
+	
+/**
+ *	---------------------------------------------
+ *	General
+ *	---------------------------------------------
+ */
+private:
+	/** Default team number */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Team", meta = (AllowPrivateAccess = "true"))
+	int32 TeamNumber;
+
 /**
  *  ----------------------------------------------
  *	Combat Related
@@ -42,10 +55,27 @@ private:
 public:
 	/** Component handling combat-related functionalities */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Combat")
+	UMyCombatComponent* CombatComponent;
+
+	UFUNCTION(Category = "Player")
+	void LightAttack();
+	
+protected:
+	UFUNCTION(Category = "Player")
+	virtual void EquipWeapon_Implementation() override;
+	
+/**
+ *  ----------------------------------------------
+ *	Health Related
+ *  ----------------------------------------------
+ */
+public:
+	/** Component handling health-related functionalities */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Health")
 	UMyHealthComponent* HealthComponent;
 	
 	/** The maximum number of enemies who can attack the player simultaneously */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Combat")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Health")
 	int32 AttackTokenCount;
 
 	/** NPCCombatInterface, request token */
@@ -60,9 +90,8 @@ public:
 	UFUNCTION(Category = "Player")
 	virtual int32 GetTeamNumber_Implementation() override;
 
-private:
-	/** Default team number */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Team", meta = (AllowPrivateAccess = "true"))
-	int32 TeamNumber;
+	/** NPCCombatInterface */
+	UFUNCTION(Category = "Player")
+	virtual bool TakeDamage_Implementation(AActor* Attacker, const FSDamageInfo& DamageInfo) override;
 };
 

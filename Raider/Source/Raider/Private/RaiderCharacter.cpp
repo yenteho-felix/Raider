@@ -14,8 +14,8 @@
 #include "Share/MyHealthComponent.h"
 
 ARaiderCharacter::ARaiderCharacter()
-	: AttackTokenCount(1),
-	  TeamNumber(255)
+	: TeamNumber(255),
+	  AttackTokenCount(1)
 {
 	// Set size for player capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -47,9 +47,12 @@ ARaiderCharacter::ARaiderCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
-	// Combat Component
+	// Health Component
 	HealthComponent = CreateDefaultSubobject<UMyHealthComponent>("HealthComponent");
 	HealthComponent->AttackTokenCount = AttackTokenCount;
+
+	// Combat Component
+	CombatComponent = CreateDefaultSubobject<UMyCombatComponent>("CombatComponent");
 	
 }
 
@@ -78,4 +81,49 @@ void ARaiderCharacter::ReturnAttackToken_Implementation(AActor* RequestingAttack
 int32 ARaiderCharacter::GetTeamNumber_Implementation()
 {
 	return TeamNumber;
+}
+
+bool ARaiderCharacter::TakeDamage_Implementation(AActor* Attacker, const FSDamageInfo& DamageInfo)
+{
+	if (!HealthComponent || !CombatComponent)
+	{
+		return false;
+	}
+	
+	// Check if combat logic allows damage to be applied
+	if (CombatComponent->ShouldProcessDamage(DamageInfo))
+	{
+		HealthComponent->TakeDamage(DamageInfo.Amount);
+		CombatComponent->TakeHit();
+		return true;
+	}
+
+	return false;
+}
+
+void ARaiderCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	EquipWeapon_Implementation();
+}
+
+void ARaiderCharacter::EquipWeapon_Implementation()
+{
+	if (!CombatComponent)
+	{
+		return;
+	}
+
+	CombatComponent->EquipWeapon();
+}
+
+void ARaiderCharacter::LightAttack() 
+{
+	if (!CombatComponent)
+	{
+		return;
+	}
+
+	CombatComponent->Attack(nullptr);
 }
