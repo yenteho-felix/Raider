@@ -1,6 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "RaiderCharacter.h"
+
+#include "Blueprint/UserWidget.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Camera/CameraComponent.h"
 #include "Components/DecalComponent.h"
@@ -101,11 +103,53 @@ bool ARaiderCharacter::TakeDamage_Implementation(AActor* Attacker, const FSDamag
 	return false;
 }
 
+float ARaiderCharacter::GetMaxHealth_Implementation()
+{
+	if (!HealthComponent)
+	{
+		return 0;
+	}
+
+	return HealthComponent->MaxHealth;
+}
+
+float ARaiderCharacter::GetCurrentHealth_Implementation()
+{
+	if (!HealthComponent)
+	{
+		return 0;
+	}
+
+	return HealthComponent->Health;
+}
+
 void ARaiderCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Add Player UI
+	if (PlayerUIClass)
+	{
+		AddWidgetToViewPort(PlayerUIClass, false);
+	}
+
 	EquipWeapon_Implementation();
+}
+
+void ARaiderCharacter::AddWidgetToViewPort(const TSubclassOf<UUserWidget>& InWidgetClass, bool bShowMouseCursor) const
+{
+	if (InWidgetClass)
+	{
+		if (UUserWidget* WidgetInstance = CreateWidget<UUserWidget>(GetWorld(), InWidgetClass))
+		{
+			WidgetInstance->AddToViewport();
+		}
+		
+		if (APlayerController* MyPlayerController = Cast<APlayerController>(GetController()))
+		{
+			MyPlayerController->SetShowMouseCursor(bShowMouseCursor);
+		}
+	}
 }
 
 void ARaiderCharacter::EquipWeapon_Implementation()

@@ -14,7 +14,8 @@ public class Raider : ModuleRules
 		        "NavigationSystem", 
 		        "AIModule", 
 		        "Niagara", 
-		        "EnhancedInput" 
+		        "EnhancedInput",
+		        "UMG"
 	        });
         
         OptimizeCode = CodeOptimization.Never;  // remove from real game

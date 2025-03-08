@@ -48,6 +48,20 @@ private:
 	int32 TeamNumber;
 
 /**
+ *	---------------------------------------------
+ *	Widget
+ *	---------------------------------------------
+ */
+public:
+	/** Variable to store game play widget */
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Player|Widget")
+	TSubclassOf<UUserWidget> PlayerUIClass;
+	
+protected:
+	/** Add give widget class to the viewport */
+	void AddWidgetToViewPort(const TSubclassOf<UUserWidget>& InWidgetClass, bool bShowMouseCursor) const;
+	
+/**
  *  ----------------------------------------------
  *	Combat Related
  *  ----------------------------------------------
@@ -61,6 +75,7 @@ public:
 	void LightAttack();
 	
 protected:
+	/** NPCCombatInterface, equip weapon function */
 	UFUNCTION(Category = "Player")
 	virtual void EquipWeapon_Implementation() override;
 	
@@ -90,8 +105,16 @@ public:
 	UFUNCTION(Category = "Player")
 	virtual int32 GetTeamNumber_Implementation() override;
 
-	/** NPCCombatInterface */
+	/** NPCCombatInterface, take damage function */
 	UFUNCTION(Category = "Player")
 	virtual bool TakeDamage_Implementation(AActor* Attacker, const FSDamageInfo& DamageInfo) override;
+
+	/** NPCCombatInterface, return max health of player */
+	UFUNCTION(BlueprintCallable, Category = "Player")
+	virtual float GetMaxHealth_Implementation() override;
+
+	/** NPCCombatInterface, return current health of player */
+	UFUNCTION(BlueprintCallable, Category = "Player")
+	virtual float GetCurrentHealth_Implementation() override;
 };
 
