@@ -66,6 +66,10 @@ void ANPCAIController::BeginPlay()
 
 	if (AIPerceptionComponent)
 	{
+		// Prevent multiple bindings by unbinding first
+		AIPerceptionComponent->OnPerceptionUpdated.RemoveDynamic(this, &ANPCAIController::OnPerceptionUpdated);
+
+		// Bind the delegates
 		AIPerceptionComponent->OnPerceptionUpdated.AddDynamic(this, &ANPCAIController::OnPerceptionUpdated);
 	}
 	
