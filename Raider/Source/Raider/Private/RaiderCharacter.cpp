@@ -2,6 +2,7 @@
 
 #include "RaiderCharacter.h"
 
+#include "RaiderPlayerController.h"
 #include "Blueprint/UserWidget.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Camera/CameraComponent.h"
@@ -12,12 +13,14 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Materials/Material.h"
 #include "Engine/World.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Share/MyCombatComponent.h"
 #include "Share/MyHealthComponent.h"
 
 ARaiderCharacter::ARaiderCharacter()
 	: TeamNumber(255),
-	  AttackTokenCount(1)
+	  AttackTokenCount(1),
+      bIsAttacking(false)
 {
 	// Set size for player capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -123,10 +126,119 @@ float ARaiderCharacter::GetCurrentHealth_Implementation()
 	return HealthComponent->Health;
 }
 
+bool ARaiderCharacter::IsDead_Implementation()
+{
+	if (!HealthComponent)
+	{
+		return false;
+	}
+	return !HealthComponent->IsAlive();
+}
+
+void ARaiderCharacter::OnAttackMontageNotifyHandler_Implementation(FName NotifyName)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Called C++ Default Attack Montage Notify"));
+
+	if (NotifyName == "Slash")
+	{
+	    // Perform a multi-hit sphere trace in front of character
+		TArray<AActor*> ActorsToIgnore;
+		ActorsToIgnore.Add(this);
+
+		TArray<FHitResult> HitResults;
+		TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+		ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
+
+		const bool bHit = UKismetSystemLibrary::SphereTraceMultiForObjects(
+			GetWorld(),
+			GetActorLocation(),
+			GetActorLocation() + (GetActorForwardVector() * 150.0f),
+			50.0f,
+			ObjectTypes,
+			false,
+			ActorsToIgnore,
+			EDrawDebugTrace::ForDuration,
+			HitResults,
+			true
+		);
+
+		// Apply damage to all valid actors in the hit results
+		FSDamageInfo DamageInfo;
+		DamageInfo.Amount = 20;
+		DamageInfo.DamageType = EDamageType::Melee;
+		DamageInfo.DamageReact = EDamageReact::Hit;
+		if (bHit && HitResults.Num() > 0)
+		{
+			CombatComponent->DamageAllNoneTeamMembers(HitResults, DamageInfo);
+		}
+	}
+}
+
+void ARaiderCharacter::OnDeathHandler_Implementation()
+{
+	//Play death animation
+	if (HealthComponent)
+	{
+		if (HealthComponent->DeathMontage)
+		{
+			HealthComponent->PlayDeathMontage(HealthComponent->DeathMontage);
+		}
+		else
+		{
+			HealthComponent->PlayDeathRagDoll();
+		}
+	}
+
+	// Stop movement & collision
+	GetCharacterMovement()->StopMovementImmediately();
+	GetCharacterMovement()->DisableMovement();
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	// Disable Input and set input mode to UI-only
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		PC->SetIgnoreMoveInput(true);
+		PC->SetIgnoreLookInput(true);
+
+		FInputModeUIOnly InputMode;
+		PC->SetInputMode(InputMode);
+		PC->bShowMouseCursor = true;
+	}
+}
+
+void ARaiderCharacter::OnAttackEndHandler()
+{
+	bIsAttacking = false;
+	
+	// Enable Input
+	GetController()->SetIgnoreMoveInput(false);
+	GetController()->SetIgnoreLookInput(false);
+}
+
 void ARaiderCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (CombatComponent)
+	{
+		// Prevent multiple bindings by unbinding first
+		CombatComponent->OnAttackMontageNotify.RemoveDynamic(this, &ARaiderCharacter::OnAttackMontageNotifyHandler);
+		CombatComponent->OnAttackEnd.RemoveDynamic(this, &ARaiderCharacter::OnAttackEndHandler);
+
+		// Bind the delegates
+		CombatComponent->OnAttackMontageNotify.AddDynamic(this, &ARaiderCharacter::OnAttackMontageNotifyHandler);
+		CombatComponent->OnAttackEnd.AddDynamic(this, &ARaiderCharacter::OnAttackEndHandler);
+	}
+
+	if (HealthComponent)
+	{
+		// Prevent multiple bindings by unbinding first
+		HealthComponent->OnDeath.RemoveDynamic(this, &ARaiderCharacter::OnDeathHandler);
+		
+		// Bind the delegates
+		HealthComponent->OnDeath.AddDynamic(this, &ARaiderCharacter::OnDeathHandler);
+	}
+	
 	// Add Player UI
 	if (PlayerUIClass)
 	{
@@ -164,10 +276,15 @@ void ARaiderCharacter::EquipWeapon_Implementation()
 
 void ARaiderCharacter::LightAttack() 
 {
-	if (!CombatComponent)
+	if (!CombatComponent || bIsAttacking)
 	{
 		return;
 	}
 
+	bIsAttacking = true;
 	CombatComponent->Attack(nullptr);
+
+	// Disable Input
+	GetController()->SetIgnoreMoveInput(true);
+	GetController()->SetIgnoreLookInput(true);
 }

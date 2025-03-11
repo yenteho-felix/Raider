@@ -78,6 +78,10 @@ protected:
 	/** NPCCombatInterface, equip weapon function */
 	UFUNCTION(Category = "Player")
 	virtual void EquipWeapon_Implementation() override;
+
+private:
+	/** Indicates if character is currently attacking */
+	bool bIsAttacking;
 	
 /**
  *  ----------------------------------------------
@@ -116,5 +120,34 @@ public:
 	/** NPCCombatInterface, return current health of player */
 	UFUNCTION(BlueprintCallable, Category = "Player")
 	virtual float GetCurrentHealth_Implementation() override;
+
+	/** NPCCombatInterface, check if character is dead */
+	UFUNCTION(BlueprintCallable, Category = "Player")
+	virtual bool IsDead_Implementation() override;
+
+/**
+ *	---------------------------------------------
+ *  Delegate Events
+ *  ---------------------------------------------
+ */
+public:
+	/**
+	 *  Handles attack montage animation notify events.
+	 *  @param NotifyName - The name of the notify event triggered from the attack montage.
+	 */
+	UFUNCTION(BlueprintNativeEvent, Category = "Player|Combat")
+	void OnAttackMontageNotifyHandler(FName NotifyName);
+	virtual void OnAttackMontageNotifyHandler_Implementation(FName NotifyName);
+
+	/** NPCCombatInterface, handle OnDeath delegate */
+	UFUNCTION(BlueprintCallable, Category = "Player|Combat")
+	virtual void OnDeathHandler_Implementation() override;
+
+protected:
+	/**
+	 * Handles the end of an attack sequence.
+	 */
+	UFUNCTION(Category = "Player|Combat")
+	void OnAttackEndHandler();
 };
 
