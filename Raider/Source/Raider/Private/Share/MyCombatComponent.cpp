@@ -6,6 +6,7 @@
 #include "DelayAction.h"
 #include "TimerManager.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Share/MyCombatInterface.h"
 #include "Share/Struct/FSDamageInfo.h"
 #include "Weapon/WeaponBase.h"
@@ -244,12 +245,6 @@ void UMyCombatComponent::Attack(AActor* AttackTarget)
 	if (AttackAnimInstance && !AttackAnimInstance->IsAnyMontagePlaying())
 	{
 		PlayNextAttackMontage();
-
-		// Disable Move Input
-		if (ACharacter* Owner = GetOwner<ACharacter>())
-		{
-			Owner->GetController()->SetIgnoreMoveInput(true);
-		}
 	}
 	else
 	{
@@ -329,12 +324,6 @@ void UMyCombatComponent::OnAttackMontageEnded(UAnimMontage* Montage, bool bInter
 
 void UMyCombatComponent::TriggerOnAttackEnd()
 {
-	// Enable Move Input
-	if (ACharacter* Owner = GetOwner<ACharacter>())
-	{
-		Owner->GetController()->SetIgnoreMoveInput(false);
-	}
-		
 	OnAttackEnd.Broadcast();
 }
 

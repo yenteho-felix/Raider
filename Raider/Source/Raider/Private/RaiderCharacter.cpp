@@ -209,6 +209,7 @@ void ARaiderCharacter::OnDeathHandler_Implementation()
 void ARaiderCharacter::OnAttackEndHandler()
 {
 	bIsAttacking = false;
+	GetCharacterMovement()->MaxWalkSpeed = DefaultWalkSpeed;
 }
 
 void ARaiderCharacter::BeginPlay()
@@ -242,6 +243,9 @@ void ARaiderCharacter::BeginPlay()
 	}
 
 	EquipWeapon_Implementation();
+
+	// Store the default walk speed
+	DefaultWalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
 }
 
 void ARaiderCharacter::AddWidgetToViewPort(const TSubclassOf<UUserWidget>& InWidgetClass, bool bShowMouseCursor) const
@@ -277,6 +281,11 @@ void ARaiderCharacter::LightAttack()
 		return;
 	}
 
-	bIsAttacking = true;
+	if (!bIsAttacking)
+	{
+		bIsAttacking = true;
+		GetCharacterMovement()->MaxWalkSpeed = 0.0f;
+	}
+	
 	CombatComponent->Attack(nullptr);
 }

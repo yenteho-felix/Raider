@@ -71,6 +71,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Combat")
 	UMyCombatComponent* CombatComponent;
 
+	/** Indicates if character is currently attacking */
+	bool bIsAttacking;
+
 	UFUNCTION(Category = "Player")
 	void LightAttack();
 	
@@ -80,8 +83,8 @@ protected:
 	virtual void EquipWeapon_Implementation() override;
 
 private:
-	/** Indicates if character is currently attacking */
-	bool bIsAttacking;
+	/** Store the default walk speed */
+	float DefaultWalkSpeed;
 	
 /**
  *  ----------------------------------------------
