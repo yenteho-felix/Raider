@@ -19,8 +19,8 @@
 
 ARaiderCharacter::ARaiderCharacter()
 	: TeamNumber(255),
-	  AttackTokenCount(1),
-      bIsAttacking(false)
+	  bIsAttacking(false),
+      AttackTokenCount(1)
 {
 	// Set size for player capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -137,7 +137,7 @@ bool ARaiderCharacter::IsDead_Implementation()
 
 void ARaiderCharacter::OnAttackMontageNotifyHandler_Implementation(FName NotifyName)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Called C++ Default Attack Montage Notify"));
+	//UE_LOG(LogTemp, Warning, TEXT("Called C++ Default Attack Montage Notify"));
 
 	if (NotifyName == "Slash")
 	{
@@ -209,10 +209,6 @@ void ARaiderCharacter::OnDeathHandler_Implementation()
 void ARaiderCharacter::OnAttackEndHandler()
 {
 	bIsAttacking = false;
-	
-	// Enable Input
-	GetController()->SetIgnoreMoveInput(false);
-	GetController()->SetIgnoreLookInput(false);
 }
 
 void ARaiderCharacter::BeginPlay()
@@ -276,15 +272,11 @@ void ARaiderCharacter::EquipWeapon_Implementation()
 
 void ARaiderCharacter::LightAttack() 
 {
-	if (!CombatComponent || bIsAttacking)
+	if (!CombatComponent)
 	{
 		return;
 	}
 
 	bIsAttacking = true;
 	CombatComponent->Attack(nullptr);
-
-	// Disable Input
-	GetController()->SetIgnoreMoveInput(true);
-	GetController()->SetIgnoreLookInput(true);
 }

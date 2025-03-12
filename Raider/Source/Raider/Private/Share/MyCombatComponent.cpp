@@ -5,6 +5,7 @@
 
 #include "DelayAction.h"
 #include "TimerManager.h"
+#include "GameFramework/Character.h"
 #include "Share/MyCombatInterface.h"
 #include "Share/Struct/FSDamageInfo.h"
 #include "Weapon/WeaponBase.h"
@@ -14,8 +15,12 @@
 // Sets default values for this component's properties
 UMyCombatComponent::UMyCombatComponent()
 	: IsWeaponEquipped(false),
+	  CurrentAttackTarget(nullptr),
 	  AttackRadius(150),
 	  DefendRadius(250),
+      CurrentComboIndex(0),
+      bComboRequested(false),
+      AttackAnimInstance(nullptr),
 	  bIsInvincible(false),
 	  bIsBlocking(false),
 	  bIsInterruptible(true)
@@ -220,64 +225,74 @@ void UMyCombatComponent::GetCombatRange(float& OutAttackRadius, float& OutDefend
 
 void UMyCombatComponent::Attack(AActor* AttackTarget)
 {
-	AActor* Owner = GetOwner();
-
-	if (!Owner) return;
-
-	PlayAttackMontage(AttackMontage);
-
-	CurrentAttackTarget = AttackTarget;
-
-	// Disable this since we move the token request to AI behavior tree
-	// // Check if the attack target implements the interface
-	// if (AttackTarget->GetClass()->ImplementsInterface(UMyCombatInterface::StaticClass()))
-	// {
-	// 	if (IMyCombatInterface::Execute_RequestAttackToken(AttackTarget, Owner, 1))
-	// 	{
-	// 		CurrentAttackTarget = AttackTarget;
-	// 		PlayAttackMontage(AttackMontage);
-	// 	}
-	// 	else
-	// 	{
-	// 		// Delay execution by one tick to allow event listeners to bind
-	// 		GetWorld()->GetTimerManager().SetTimerForNextTick(this, &UMyCombatComponent::TriggerOnAttackEnd);
-	// 	}	
-	// }
-	// else
-	// {
-	// 	UE_LOG(LogTemp, Error, TEXT("%s is does not implement the combat interface!"), *AttackTarget->GetName());
-	// }
-}
-
-void UMyCombatComponent::PlayAttackMontage(UAnimMontage* AnimMontage)
-{
-	if (!AnimMontage)
+	if (!GetOwner() || !AttackMontages.IsValidIndex(CurrentComboIndex))
 	{
 		return;
 	}
 
-	if (const AActor* Owner = GetOwner())
+	if (!AttackAnimInstance)
 	{
-		if (const USkeletalMeshComponent* MeshComponent = Owner->FindComponentByClass<USkeletalMeshComponent>())
+		if (AActor* Owner = GetOwner())
 		{
-			if (UAnimInstance* AnimInstance = MeshComponent->GetAnimInstance())
+			if (USkeletalMeshComponent* MeshComponent = Owner->FindComponentByClass<USkeletalMeshComponent>())
 			{
-				// Ensure binding happens only once
-				if (!bIsNotifyBound)
-				{
-					// Bind to montage notify
-					AnimInstance->OnPlayMontageNotifyBegin.AddDynamic(this, &UMyCombatComponent::OnAttackMontageNotifyBegin);
-					bIsNotifyBound = true;
-				}
-				
-				AnimInstance->Montage_Play(AnimMontage);
-				
-				// Bind to montage end event
-				FOnMontageEnded MontageEndDelegate;
-				MontageEndDelegate.BindUObject(this, &UMyCombatComponent::OnAttackMontageEnded);
-				AnimInstance->Montage_SetEndDelegate(MontageEndDelegate, AnimMontage);
-			}
+				AttackAnimInstance = MeshComponent->GetAnimInstance();
+			}			
 		}
+	}
+	
+	if (AttackAnimInstance && !AttackAnimInstance->IsAnyMontagePlaying())
+	{
+		PlayNextAttackMontage();
+
+		// Disable Move Input
+		if (ACharacter* Owner = GetOwner<ACharacter>())
+		{
+			Owner->GetController()->SetIgnoreMoveInput(true);
+		}
+	}
+	else
+	{
+		bComboRequested = true;
+	}
+	
+	CurrentAttackTarget = AttackTarget;
+}
+
+void UMyCombatComponent::PlayAttackMontage(UAnimMontage* AnimMontage)
+{
+	if (!AnimMontage || !AttackAnimInstance)
+	{
+		return;
+	}
+	
+	// Ensure binding happens only once
+	if (!bIsNotifyBound)
+	{
+		// Bind to montage notify
+		AttackAnimInstance->OnPlayMontageNotifyBegin.AddDynamic(this, &UMyCombatComponent::OnAttackMontageNotifyBegin);
+		bIsNotifyBound = true;
+	}
+	
+	AttackAnimInstance->Montage_Play(AnimMontage);
+	
+	// Bind to montage end event
+	FOnMontageEnded MontageEndDelegate;
+	MontageEndDelegate.BindUObject(this, &UMyCombatComponent::OnAttackMontageEnded);
+	AttackAnimInstance->Montage_SetEndDelegate(MontageEndDelegate, AnimMontage);
+}
+
+void UMyCombatComponent::PlayNextAttackMontage()
+{
+	if (!AttackMontages.IsValidIndex(CurrentComboIndex))
+	{
+		return;
+	}
+	
+	if (UAnimMontage* MontageToPlay = AttackMontages[CurrentComboIndex])
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("Current combo index is %d"), CurrentComboIndex);
+		PlayAttackMontage(MontageToPlay);
 	}
 }
 
@@ -288,12 +303,38 @@ void UMyCombatComponent::OnAttackMontageNotifyBegin(FName NotifyName, const FBra
 
 void UMyCombatComponent::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	TriggerOnAttackEnd();
+	// Reset combo if interrupted
+	if (bInterrupted)
+	{
+		bComboRequested = false;
+		CurrentComboIndex = 0;
+		CurrentAttackTarget = nullptr;
+		TriggerOnAttackEnd();
+		return;
+	}
+
+	if (bComboRequested)
+	{
+		bComboRequested = false;
+		CurrentComboIndex = (CurrentComboIndex + 1) % AttackMontages.Num();
+		PlayNextAttackMontage();
+	}
+	else
+	{
+		CurrentComboIndex = 0;
+		CurrentAttackTarget = nullptr;
+		TriggerOnAttackEnd();
+	}
 }
 
 void UMyCombatComponent::TriggerOnAttackEnd()
 {
-	CurrentAttackTarget = nullptr;
+	// Enable Move Input
+	if (ACharacter* Owner = GetOwner<ACharacter>())
+	{
+		Owner->GetController()->SetIgnoreMoveInput(false);
+	}
+		
 	OnAttackEnd.Broadcast();
 }
 

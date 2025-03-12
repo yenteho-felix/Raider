@@ -135,9 +135,9 @@ public:
 	UPROPERTY()
 	AActor* CurrentAttackTarget;
 	
-	/** Animation montage played when the NPC performs an attack */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Attack")
-	TObjectPtr<UAnimMontage> AttackMontage;
+	/** Array of attack montages for combo sequence */
+	UPROPERTY(EditDefaultsOnly, Category = "Combat|Attack")
+	TArray<UAnimMontage*> AttackMontages;
 
 	/** The radius within which the NPC can perform an attack */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Attack")
@@ -170,9 +170,22 @@ protected:
 	UFUNCTION(Category = "Combat|Attack")
 	void PlayAttackMontage(UAnimMontage* AnimMontage);
 
+	/** Play the next attack montage in the sequence */
+	void PlayNextAttackMontage();
+
 private:
 	/** Ensures OnPlayMontageNotifyBegin is only bound once. */
 	bool bIsNotifyBound = false;
+	
+	/** Tracks the current combo step */
+	int32 CurrentComboIndex;
+
+	/** If the player pressed attack again during the animation */
+	bool bComboRequested;
+
+	/** Reference to the active montage being played */
+	UPROPERTY()
+	UAnimInstance* AttackAnimInstance;
 	
 /**
  *	---------------------------------------------

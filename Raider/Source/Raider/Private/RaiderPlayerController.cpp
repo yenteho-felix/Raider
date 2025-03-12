@@ -58,7 +58,7 @@ void ARaiderPlayerController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ARaiderPlayerController::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ARaiderPlayerController::Look);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ARaiderPlayerController::Jump);
-		EnhancedInputComponent->BindAction(LightAttackAction, ETriggerEvent::Triggered, this, &ARaiderPlayerController::LightAttack);
+		EnhancedInputComponent->BindAction(LightAttackAction, ETriggerEvent::Started, this, &ARaiderPlayerController::LightAttack);
 	}
 	else
 	{
