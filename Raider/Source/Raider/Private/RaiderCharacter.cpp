@@ -139,16 +139,17 @@ void ARaiderCharacter::OnAttackMontageNotifyHandler_Implementation(FName NotifyN
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Called C++ Default Attack Montage Notify"));
 
+
+    // Perform a multi-hit sphere trace in front of character
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.Add(this);
+
+	TArray<FHitResult> HitResults;
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
+
 	if (NotifyName == "Slash")
 	{
-	    // Perform a multi-hit sphere trace in front of character
-		TArray<AActor*> ActorsToIgnore;
-		ActorsToIgnore.Add(this);
-
-		TArray<FHitResult> HitResults;
-		TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
-		ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
-
 		const bool bHit = UKismetSystemLibrary::SphereTraceMultiForObjects(
 			GetWorld(),
 			GetActorLocation(),
@@ -161,7 +162,59 @@ void ARaiderCharacter::OnAttackMontageNotifyHandler_Implementation(FName NotifyN
 			HitResults,
 			true
 		);
+		
+		// Apply damage to all valid actors in the hit results
+		FSDamageInfo DamageInfo;
+		DamageInfo.Amount = 10;
+		DamageInfo.DamageType = EDamageType::Melee;
+		DamageInfo.DamageReact = EDamageReact::Hit;
+		if (bHit && HitResults.Num() > 0)
+		{
+			CombatComponent->DamageAllNoneTeamMembers(HitResults, DamageInfo);
+		}
+	}
 
+	if (NotifyName == "SlashB")
+	{
+		const bool bHit = UKismetSystemLibrary::SphereTraceMultiForObjects(
+			GetWorld(),
+			GetActorLocation(),
+			GetActorLocation() + (GetActorForwardVector() * 50.0f),
+			150.0f,
+			ObjectTypes,
+			false,
+			ActorsToIgnore,
+			EDrawDebugTrace::ForDuration,
+			HitResults,
+			true
+		);
+		
+		// Apply damage to all valid actors in the hit results
+		FSDamageInfo DamageInfo;
+		DamageInfo.Amount = 10;
+		DamageInfo.DamageType = EDamageType::Melee;
+		DamageInfo.DamageReact = EDamageReact::Hit;
+		if (bHit && HitResults.Num() > 0)
+		{
+			CombatComponent->DamageAllNoneTeamMembers(HitResults, DamageInfo);
+		}
+	}
+
+	if (NotifyName == "SlashC")
+	{
+		const bool bHit = UKismetSystemLibrary::SphereTraceMultiForObjects(
+			GetWorld(),
+			GetActorLocation(),
+			GetActorLocation() + (GetActorForwardVector() * 300.0f),
+			100.0f,
+			ObjectTypes,
+			false,
+			ActorsToIgnore,
+			EDrawDebugTrace::ForDuration,
+			HitResults,
+			true
+		);
+		
 		// Apply damage to all valid actors in the hit results
 		FSDamageInfo DamageInfo;
 		DamageInfo.Amount = 20;
@@ -172,6 +225,8 @@ void ARaiderCharacter::OnAttackMontageNotifyHandler_Implementation(FName NotifyN
 			CombatComponent->DamageAllNoneTeamMembers(HitResults, DamageInfo);
 		}
 	}
+
+	
 }
 
 void ARaiderCharacter::OnDeathHandler_Implementation()
