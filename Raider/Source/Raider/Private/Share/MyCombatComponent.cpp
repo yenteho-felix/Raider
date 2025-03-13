@@ -17,11 +17,15 @@
 UMyCombatComponent::UMyCombatComponent()
 	: IsWeaponEquipped(false),
 	  CurrentAttackTarget(nullptr),
+	  PlayerMontagePlayRate(1.3f),
+      NPCMontagePlayRate(1.0f),
 	  AttackRadius(150),
 	  DefendRadius(250),
-      CurrentComboIndex(0),
-      bComboRequested(false),
-      AttackAnimInstance(nullptr),
+	  bIsNotifyBound(false),
+	  CurrentComboIndex(0),
+	  bComboRequested(false),
+	  bComboWindowOpen(false),
+	  AttackAnimInstance(nullptr),
 	  bIsInvincible(false),
 	  bIsBlocking(false),
 	  bIsInterruptible(true)
@@ -246,7 +250,7 @@ void UMyCombatComponent::Attack(AActor* AttackTarget)
 	{
 		PlayNextAttackMontage();
 	}
-	else
+	else if (bComboWindowOpen)
 	{
 		bComboRequested = true;
 	}
@@ -268,8 +272,14 @@ void UMyCombatComponent::PlayAttackMontage(UAnimMontage* AnimMontage)
 		AttackAnimInstance->OnPlayMontageNotifyBegin.AddDynamic(this, &UMyCombatComponent::OnAttackMontageNotifyBegin);
 		bIsNotifyBound = true;
 	}
+
+	// Adjust play rate based on owner type
+	if (const ACharacter* CharacterOwner = Cast<ACharacter>(GetOwner()))
+	{
+		const float MontagePlayRate = CharacterOwner->IsPlayerControlled() ? PlayerMontagePlayRate : NPCMontagePlayRate;
+		AttackAnimInstance->Montage_Play(AnimMontage, MontagePlayRate);
+	}
 	
-	AttackAnimInstance->Montage_Play(AnimMontage);
 	
 	// Bind to montage end event
 	FOnMontageEnded MontageEndDelegate;
@@ -288,7 +298,25 @@ void UMyCombatComponent::PlayNextAttackMontage()
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Current combo index is %d"), CurrentComboIndex);
 		PlayAttackMontage(MontageToPlay);
+
+		// Schedule when to open the combo window (e.g., % of the animation)
+		const float ComboWindowTime = MontageToPlay->GetPlayLength() * ComboWindowOpenTime;
+		GetWorld()->GetTimerManager().SetTimer(ComboWindowTimer, this, &UMyCombatComponent::OpenComboWindow, ComboWindowTime, false);
+
+		// Schedule when to close the combo window (e.g., % of the animation)
+		const float CloseWindowTime = MontageToPlay->GetPlayLength() * ComboWindowCloseTime;
+		GetWorld()->GetTimerManager().SetTimer(CloseComboWindowTimer, this, &UMyCombatComponent::CloseComboWindow, CloseWindowTime, false);
 	}
+}
+
+void UMyCombatComponent::OpenComboWindow()
+{
+	bComboWindowOpen = true;
+}
+
+void UMyCombatComponent::CloseComboWindow()
+{
+	bComboWindowOpen = false;
 }
 
 void UMyCombatComponent::OnAttackMontageNotifyBegin(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload)
@@ -298,6 +326,10 @@ void UMyCombatComponent::OnAttackMontageNotifyBegin(FName NotifyName, const FBra
 
 void UMyCombatComponent::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
+	// Clear the timer
+	GetWorld()->GetTimerManager().ClearTimer(ComboWindowTimer);
+	GetWorld()->GetTimerManager().ClearTimer(CloseComboWindowTimer);
+	
 	// Reset combo if interrupted
 	if (bInterrupted)
 	{

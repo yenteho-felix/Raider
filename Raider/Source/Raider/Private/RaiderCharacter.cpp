@@ -336,11 +336,15 @@ void ARaiderCharacter::LightAttack()
 		return;
 	}
 
-	if (!bIsAttacking)
+	// If the player presses attack again during the combo window, queue the next attack
+	if (bIsAttacking && CombatComponent->IsComboWindowOpen()) 
 	{
-		bIsAttacking = true;
-		GetCharacterMovement()->MaxWalkSpeed = 50.0f;
+		CombatComponent->Attack(nullptr);
+		return;
 	}
-	
+
+	// Start the first attack
+	bIsAttacking = true;
+	GetCharacterMovement()->MaxWalkSpeed = 50.0f; // Slowing movement during attack
 	CombatComponent->Attack(nullptr);
 }
