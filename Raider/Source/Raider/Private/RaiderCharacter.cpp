@@ -158,7 +158,7 @@ void ARaiderCharacter::OnAttackMontageNotifyHandler_Implementation(FName NotifyN
 			ObjectTypes,
 			false,
 			ActorsToIgnore,
-			EDrawDebugTrace::ForDuration,
+			EDrawDebugTrace::None,
 			HitResults,
 			true
 		);
@@ -184,7 +184,7 @@ void ARaiderCharacter::OnAttackMontageNotifyHandler_Implementation(FName NotifyN
 			ObjectTypes,
 			false,
 			ActorsToIgnore,
-			EDrawDebugTrace::ForDuration,
+			EDrawDebugTrace::None,
 			HitResults,
 			true
 		);
@@ -210,7 +210,7 @@ void ARaiderCharacter::OnAttackMontageNotifyHandler_Implementation(FName NotifyN
 			ObjectTypes,
 			false,
 			ActorsToIgnore,
-			EDrawDebugTrace::ForDuration,
+			EDrawDebugTrace::None,
 			HitResults,
 			true
 		);
@@ -339,7 +339,7 @@ void ARaiderCharacter::LightAttack()
 	if (!bIsAttacking)
 	{
 		bIsAttacking = true;
-		GetCharacterMovement()->MaxWalkSpeed = 0.0f;
+		GetCharacterMovement()->MaxWalkSpeed = 50.0f;
 	}
 	
 	CombatComponent->Attack(nullptr);
