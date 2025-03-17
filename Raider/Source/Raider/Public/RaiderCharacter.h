@@ -7,6 +7,7 @@
 #include "Share/MyCombatInterface.h"
 #include "RaiderCharacter.generated.h"
 
+class UMyCombatComponent;
 class UMyHealthComponent;
 
 UCLASS(Blueprintable)
@@ -34,6 +35,32 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
 
+	virtual void BeginPlay() override;
+	
+/**
+ *	---------------------------------------------
+ *	General
+ *	---------------------------------------------
+ */
+private:
+	/** Default team number */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Team", meta = (AllowPrivateAccess = "true"))
+	int32 TeamNumber;
+
+/**
+ *	---------------------------------------------
+ *	Widget
+ *	---------------------------------------------
+ */
+public:
+	/** Variable to store game play widget */
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Player|Widget")
+	TSubclassOf<UUserWidget> PlayerUIClass;
+	
+protected:
+	/** Add give widget class to the viewport */
+	void AddWidgetToViewPort(const TSubclassOf<UUserWidget>& InWidgetClass, bool bShowMouseCursor) const;
+	
 /**
  *  ----------------------------------------------
  *	Combat Related
@@ -42,10 +69,35 @@ private:
 public:
 	/** Component handling combat-related functionalities */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Combat")
+	UMyCombatComponent* CombatComponent;
+
+	/** Indicates if character is currently attacking */
+	bool bIsAttacking;
+
+	UFUNCTION(Category = "Player")
+	void LightAttack();
+	
+protected:
+	/** NPCCombatInterface, equip weapon function */
+	UFUNCTION(Category = "Player")
+	virtual void EquipWeapon_Implementation() override;
+
+private:
+	/** Store the default walk speed */
+	float DefaultWalkSpeed;
+	
+/**
+ *  ----------------------------------------------
+ *	Health Related
+ *  ----------------------------------------------
+ */
+public:
+	/** Component handling health-related functionalities */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Health")
 	UMyHealthComponent* HealthComponent;
 	
 	/** The maximum number of enemies who can attack the player simultaneously */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Combat")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Health")
 	int32 AttackTokenCount;
 
 	/** NPCCombatInterface, request token */
@@ -60,9 +112,45 @@ public:
 	UFUNCTION(Category = "Player")
 	virtual int32 GetTeamNumber_Implementation() override;
 
-private:
-	/** Default team number */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Team", meta = (AllowPrivateAccess = "true"))
-	int32 TeamNumber;
+	/** NPCCombatInterface, take damage function */
+	UFUNCTION(Category = "Player")
+	virtual bool TakeDamage_Implementation(AActor* Attacker, const FSDamageInfo& DamageInfo) override;
+
+	/** NPCCombatInterface, return max health of player */
+	UFUNCTION(BlueprintCallable, Category = "Player")
+	virtual float GetMaxHealth_Implementation() override;
+
+	/** NPCCombatInterface, return current health of player */
+	UFUNCTION(BlueprintCallable, Category = "Player")
+	virtual float GetCurrentHealth_Implementation() override;
+
+	/** NPCCombatInterface, check if character is dead */
+	UFUNCTION(BlueprintCallable, Category = "Player")
+	virtual bool IsDead_Implementation() override;
+
+/**
+ *	---------------------------------------------
+ *  Delegate Events
+ *  ---------------------------------------------
+ */
+public:
+	/**
+	 *  Handles attack montage animation notify events.
+	 *  @param NotifyName - The name of the notify event triggered from the attack montage.
+	 */
+	UFUNCTION(BlueprintNativeEvent, Category = "Player|Combat")
+	void OnAttackMontageNotifyHandler(FName NotifyName);
+	virtual void OnAttackMontageNotifyHandler_Implementation(FName NotifyName);
+
+	/** NPCCombatInterface, handle OnDeath delegate */
+	UFUNCTION(BlueprintCallable, Category = "Player|Combat")
+	virtual void OnDeathHandler_Implementation() override;
+
+protected:
+	/**
+	 * Handles the end of an attack sequence.
+	 */
+	UFUNCTION(Category = "Player|Combat")
+	void OnAttackEndHandler();
 };
 

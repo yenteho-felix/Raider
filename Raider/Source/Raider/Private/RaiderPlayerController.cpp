@@ -53,6 +53,12 @@ void ARaiderPlayerController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Triggered, this, &ARaiderPlayerController::OnTouchTriggered);
 		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Completed, this, &ARaiderPlayerController::OnTouchReleased);
 		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Canceled, this, &ARaiderPlayerController::OnTouchReleased);
+
+		// Setup Keyboard & Gamepad input events
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ARaiderPlayerController::Move);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ARaiderPlayerController::Look);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ARaiderPlayerController::Jump);
+		EnhancedInputComponent->BindAction(LightAttackAction, ETriggerEvent::Started, this, &ARaiderPlayerController::LightAttack);
 	}
 	else
 	{
@@ -122,4 +128,49 @@ void ARaiderPlayerController::OnTouchReleased()
 {
 	bIsTouch = false;
 	OnSetDestinationReleased();
+}
+
+void ARaiderPlayerController::Move(const FInputActionValue& Value)
+{
+	if (APawn* ControlledPawn = GetPawn())
+	{
+		FVector2D MovementVector = Value.Get<FVector2D>();
+
+		const FRotator Rotation = GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+		ControlledPawn->AddMovementInput(ForwardDirection, MovementVector.Y);
+		ControlledPawn->AddMovementInput(RightDirection, MovementVector.X);
+	}
+}
+
+void ARaiderPlayerController::Look(const FInputActionValue& Value)
+{
+	if (APawn* ControlledPawn = GetPawn())
+	{
+		FVector2D LookAxisVector = Value.Get<FVector2D>();
+
+		// add yaw and pitch input to controller
+		ControlledPawn->AddControllerYawInput(LookAxisVector.X);
+		ControlledPawn->AddControllerPitchInput(LookAxisVector.Y);
+	}
+}
+ 
+void ARaiderPlayerController::Jump()
+{
+	if (ACharacter* MyCharacter = Cast<ACharacter>(GetPawn()))
+	{
+		MyCharacter->Jump();
+	}
+}
+
+void ARaiderPlayerController::LightAttack()
+{
+	if (ARaiderCharacter* MyCharacter = Cast<ARaiderCharacter>(GetPawn()))
+	{
+		MyCharacter->LightAttack();
+	}
 }

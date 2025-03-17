@@ -44,6 +44,12 @@ void ANPCCharacterBase::BeginPlay()
 
 	if (CombatComponent)
 	{
+		// Prevent multiple bindings by unbinding first
+		CombatComponent->OnDamageReact.RemoveDynamic(this, &ANPCCharacterBase::OnDamageReactHandler);
+		CombatComponent->OnDamageBlocked.RemoveDynamic(this, &ANPCCharacterBase::OnDamageBlockedHandler);
+		CombatComponent->OnTakeHitEnd.RemoveDynamic(this, &ANPCCharacterBase::OnTakeHitEndHandler);
+
+		// Bind the delegates
 		CombatComponent->OnDamageReact.AddDynamic(this, &ANPCCharacterBase::OnDamageReactHandler);
 		CombatComponent->OnDamageBlocked.AddDynamic(this, &ANPCCharacterBase::OnDamageBlockedHandler);
 		CombatComponent->OnTakeHitEnd.AddDynamic(this, &ANPCCharacterBase::OnTakeHitEndHandler);
@@ -51,6 +57,10 @@ void ANPCCharacterBase::BeginPlay()
 
 	if (HealthComponent)
 	{
+		// Prevent multiple bindings by unbinding first
+		HealthComponent->OnDeath.RemoveDynamic(this, &ANPCCharacterBase::OnDeathHandler);
+
+		// Bind the delegates
 		HealthComponent->OnDeath.AddDynamic(this, &ANPCCharacterBase::OnDeathHandler);
 	}
 }
