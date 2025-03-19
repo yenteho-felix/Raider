@@ -134,6 +134,11 @@ public:
 	/** Variable to store attack target */
 	UPROPERTY()
 	AActor* CurrentAttackTarget;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
+	UDataTable* ComboDataTable;
+
+	FName CurrentComboRow;
 	
 	/** Array of attack montages for combo sequence */
 	UPROPERTY(EditDefaultsOnly, Category = "Combat|Attack|Montage")
