@@ -201,7 +201,7 @@ bool UMyCombatComponent::IsOnSameTeam(AActor* OwnerActor, AActor* OtherActor) co
 		return false;
 	}
 	
-	if (OtherActor || !OtherActor->GetClass()->ImplementsInterface(UMyCombatInterface::StaticClass()))
+	if (!OtherActor || !OtherActor->GetClass()->ImplementsInterface(UMyCombatInterface::StaticClass()))
 	{
 		return false;
 	}
