@@ -50,7 +50,7 @@ void UMyCombatComponent::EquipWeapon()
 		{
 			if (USkeletalMeshComponent* MeshComponent = Owner->FindComponentByClass<USkeletalMeshComponent>())
 			{
-				AttachWeaponToSocket(WeaponActorObj);
+				AttachWeaponToSocket(WeaponActorObj, WeaponSocketName);
 				PlayEquipMontage(EquipMontage);
 				IsWeaponEquipped = true;
 			}
@@ -71,16 +71,28 @@ void UMyCombatComponent::UnEquipWeapon()
 	}
 }
 
-void UMyCombatComponent::AttachWeaponToSocket(AActor* WeaponActor) const
+void UMyCombatComponent::EquipShield()
+{
+	if (ShieldActorClass)
+	{
+		ShieldActorObj = GetWorld()->SpawnActor<AWeaponBase>(ShieldActorClass, FVector::ZeroVector, FRotator::ZeroRotator);
+		if (const AActor* Owner = GetOwner())
+		{
+			AttachWeaponToSocket(ShieldActorObj, ShieldSocketName);
+		}
+	}
+}
+
+void UMyCombatComponent::AttachWeaponToSocket(AActor* WeaponActor, const FName SocketName) const
 {
 	if (const AActor* Owner = GetOwner())
 	{
 		USkeletalMeshComponent* MeshComponent = Owner->FindComponentByClass<USkeletalMeshComponent>();
-		if (MeshComponent->DoesSocketExist(WeaponSocketName))
+		if (MeshComponent->DoesSocketExist(SocketName))
 		{
 			if (WeaponActor)
 			{
-				WeaponActor->AttachToComponent(MeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, WeaponSocketName);
+				WeaponActor->AttachToComponent(MeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, SocketName);
 			}
 			else
 			{
@@ -89,7 +101,7 @@ void UMyCombatComponent::AttachWeaponToSocket(AActor* WeaponActor) const
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("Socket %s does not exists on %s"), *WeaponSocketName.ToString(), *Owner->GetName());
+			UE_LOG(LogTemp, Error, TEXT("Socket %s does not exists on %s"), *SocketName.ToString(), *Owner->GetName());
 		}
 	}
 }

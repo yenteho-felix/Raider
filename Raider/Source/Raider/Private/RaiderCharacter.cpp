@@ -327,6 +327,7 @@ void ARaiderCharacter::EquipWeapon_Implementation()
 	}
 
 	CombatComponent->EquipWeapon();
+	CombatComponent->EquipShield();
 }
 
 void ARaiderCharacter::LightAttack() 

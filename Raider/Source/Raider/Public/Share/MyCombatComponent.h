@@ -64,6 +64,14 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Combat|Weapon")
 	TObjectPtr<AWeaponBase> WeaponActorObj;
 
+	/** The shield class that can be spawned for the NPC */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon")
+	TSubclassOf<AWeaponBase> ShieldActorClass;
+
+	/** Reference to the currently equipped shield */
+	UPROPERTY(BlueprintReadOnly, Category = "Combat|Weapon")
+	TObjectPtr<AWeaponBase> ShieldActorObj;
+
 	/** Animation montage played when equipping a weapon */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon")
 	TObjectPtr<UAnimMontage> EquipMontage;
@@ -76,6 +84,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon")
 	FName WeaponSocketName;
 
+	/** The socket name where the shield will be attached on the character */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Weapon")
+	FName ShieldSocketName;
+
 	/** Equips the assigned weapon */
 	UFUNCTION(BlueprintCallable, Category = "Combat|Weapon")
 	void EquipWeapon();
@@ -84,13 +96,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat|Weapon")
 	void UnEquipWeapon();
 
+	/** Equips the assigned shield */
+	UFUNCTION(BlueprintCallable, Category = "Combat|Weapon")
+	void EquipShield();
+
 protected:
 	/**
 	 *  Attaches the weapon to a specified socket on the character.
 	 *  @param WeaponActor - The weapon actor to attach.
+	 *  @param SocketName - The socket name where the weapon will be attached
 	 */
 	UFUNCTION()
-	void AttachWeaponToSocket(AActor* WeaponActor) const;
+	void AttachWeaponToSocket(AActor* WeaponActor, FName SocketName) const;
 
 	/**
 	 *	Plays the equip montage animation.
