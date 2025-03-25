@@ -250,6 +250,10 @@ private:
  *  ---------------------------------------------
  */
 public:
+	/** Animation montage played when blocking the attack */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Defense")
+	TObjectPtr<UAnimMontage> BlockMontage;
+	
 	/** Animation montage played when taking hit */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Defense")
 	TObjectPtr<UAnimMontage> TakeHitMontage;
@@ -277,6 +281,10 @@ public:
 	/** Taking hit */
 	UFUNCTION(BlueprintCallable, Category = "Combat|Defense")
 	void TakeHit();
+
+	/** Start Blocking the attack */
+	UFUNCTION(BlueprintCallable, Category = "Combat|Defense")
+	void Block();
 	
 protected:
 	/**
@@ -285,6 +293,13 @@ protected:
 	 */
 	UFUNCTION(Category = "Combat|Defense")
 	void PlayTakeHitMontage(UAnimMontage* AnimMontage);
+
+	/**
+	 *  Plays the hit montage animation.
+	 *  @param AnimMontage - The montage to play when taking hit
+	 */
+	UFUNCTION(Category = "Combat|Defense")
+	void PlayBlockingMontage(UAnimMontage* AnimMontage);
 
 /**
  *  ---------------------------------------------------------------------
@@ -359,6 +374,22 @@ protected:
 	 */
 	UFUNCTION(Category = "Combat|Delegate")
 	void OnTakeHitMontageEnded(UAnimMontage* Montage, bool bInterrupted) const;
+
+	/**
+	 *  Callback function triggered when the blocking montage notify begins
+	 *  @param NotifyName - The name of animation montage notifier
+	 *  @param BranchingPointPayload - dditional data passed by the animation system for branching point notifies.
+	 */
+	UFUNCTION(Category = "Combat|Delegate")
+	void OnBlockingMontageNotifyBegin(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload);
+	
+	/**
+	 *  Callback function triggered when the blocking montage animation finishes.
+	 *  @param Montage - The animation montage that completed.
+	 *  @param bInterrupted - Whether the montage was interrupted.
+	 */
+	UFUNCTION(Category = "Combat|Delegate")
+	void OnBlockingMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 public:
 	/** Broadcast OnAttackEnd */

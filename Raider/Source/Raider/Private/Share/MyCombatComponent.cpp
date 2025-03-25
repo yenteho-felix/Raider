@@ -399,10 +399,15 @@ void UMyCombatComponent::TakeHit()
 {
 	if (TakeHitMontage)
 	{
-		if (const AActor* Owner = GetOwner())
-		{
-			PlayTakeHitMontage(TakeHitMontage);
-		}
+		PlayTakeHitMontage(TakeHitMontage);
+	}
+}
+
+void UMyCombatComponent::Block()
+{
+	if (BlockMontage)
+	{
+		PlayBlockingMontage(BlockMontage);
 	}
 }
 
@@ -429,8 +434,50 @@ void UMyCombatComponent::PlayTakeHitMontage(UAnimMontage* AnimMontage)
 	}
 }
 
+void UMyCombatComponent::PlayBlockingMontage(UAnimMontage* AnimMontage)
+{
+	if (!AnimMontage)
+	{
+		return;
+	}
+
+	if (const AActor* Owner = GetOwner())
+	{
+		if (const USkeletalMeshComponent* MeshComponent = Owner->FindComponentByClass<USkeletalMeshComponent>())
+		{
+			if (UAnimInstance* AnimInstance = MeshComponent->GetAnimInstance())
+			{
+				// Bind to montage notify
+				AnimInstance->OnPlayMontageNotifyBegin.RemoveDynamic(this, &UMyCombatComponent::OnBlockingMontageNotifyBegin);
+				AnimInstance->OnPlayMontageNotifyBegin.AddDynamic(this, &UMyCombatComponent::OnBlockingMontageNotifyBegin);
+
+				// Play montage
+				AnimInstance->Montage_Play(AnimMontage);
+
+				// Montage end delegate
+				FOnMontageEnded MontageEndDelegate;
+				MontageEndDelegate.BindUObject(this, &UMyCombatComponent::OnBlockingMontageEnded);
+				AnimInstance->Montage_SetEndDelegate(MontageEndDelegate, AnimMontage);
+			}
+		}
+	}
+}
+
 void UMyCombatComponent::OnTakeHitMontageEnded(UAnimMontage* Montage, bool bInterrupted) const
 {
 	OnTakeHitEnd.Broadcast();
+}
+
+void UMyCombatComponent::OnBlockingMontageNotifyBegin(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload)
+{
+	if (NotifyName == "BlockStart")
+	{
+		bIsBlocking = true;
+	}
+}
+
+void UMyCombatComponent::OnBlockingMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	bIsBlocking = false;
 }
 

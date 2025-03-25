@@ -267,6 +267,13 @@ void ARaiderCharacter::OnAttackEndHandler()
 	GetCharacterMovement()->MaxWalkSpeed = DefaultWalkSpeed;
 }
 
+void ARaiderCharacter::OnDamageBlockedHandler()
+{
+	const float Force = 300.0f;
+	const FVector Backward = -GetActorForwardVector();
+	LaunchCharacter(Backward * Force, true, false);
+}
+
 void ARaiderCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -276,10 +283,12 @@ void ARaiderCharacter::BeginPlay()
 		// Prevent multiple bindings by unbinding first
 		CombatComponent->OnAttackMontageNotify.RemoveDynamic(this, &ARaiderCharacter::OnAttackMontageNotifyHandler);
 		CombatComponent->OnAttackEnd.RemoveDynamic(this, &ARaiderCharacter::OnAttackEndHandler);
+		CombatComponent->OnDamageBlocked.RemoveDynamic(this, &ARaiderCharacter::OnDamageBlockedHandler);
 
 		// Bind the delegates
 		CombatComponent->OnAttackMontageNotify.AddDynamic(this, &ARaiderCharacter::OnAttackMontageNotifyHandler);
 		CombatComponent->OnAttackEnd.AddDynamic(this, &ARaiderCharacter::OnAttackEndHandler);
+		CombatComponent->OnDamageBlocked.AddDynamic(this, &ARaiderCharacter::OnDamageBlockedHandler);
 	}
 
 	if (HealthComponent)
@@ -328,6 +337,20 @@ void ARaiderCharacter::EquipWeapon_Implementation()
 
 	CombatComponent->EquipWeapon();
 	CombatComponent->EquipShield();
+}
+
+void ARaiderCharacter::Block_Implementation()
+{
+	if (!CombatComponent)
+	{
+		return;
+	}
+
+	// Skip block command if player is blocking already
+	if (!CombatComponent->bIsBlocking)
+	{
+		CombatComponent->Block();
+	}
 }
 
 void ARaiderCharacter::LightAttack() 

@@ -59,6 +59,10 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void Attack(AActor* AttackTarget);
 
+	/** Called when the NPC performs a block action. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void Block();
+
 	/**
 	 * Attempts to reserve attack tokens for an attacking entity.
 	 * @param RequestingAttacker - The entity requesting attack permission.

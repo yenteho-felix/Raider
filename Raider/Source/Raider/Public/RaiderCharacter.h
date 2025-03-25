@@ -82,6 +82,10 @@ protected:
 	UFUNCTION(Category = "Player")
 	virtual void EquipWeapon_Implementation() override;
 
+	/** NPCCombatInterface, blocking an attack */
+	UFUNCTION(Category = "Player")
+	virtual void Block_Implementation() override;
+
 private:
 	/** Store the default walk speed */
 	float DefaultWalkSpeed;
@@ -152,5 +156,11 @@ protected:
 	 */
 	UFUNCTION(Category = "Player|Combat")
 	void OnAttackEndHandler();
+
+	/**
+	 *  Reaction when blocking enemy's attack successfully
+	 */
+	UFUNCTION(Category = "Player|Combat")	
+	void OnDamageBlockedHandler();
 };
 

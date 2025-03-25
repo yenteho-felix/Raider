@@ -59,6 +59,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* LightAttackAction;
 
+	/** Blocking Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* BlockAction;
+
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */
 	uint32 bMoveToMouseCursor : 1;
@@ -80,6 +84,7 @@ protected:
 	void Look(const FInputActionValue& Value);
 	void Jump();
 	void LightAttack();
+	void Block();
 
 private:
 	FVector CachedDestination;
