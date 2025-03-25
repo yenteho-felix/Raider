@@ -1,8 +1,8 @@
 # Raider
 A fully functional top-down RPG developed in Unreal Engine 5.4, showcasing core gameplay mechanics, AI behavior, dynamic environments, and scalable systems.
 
-## Progress
-Currently working on Enemy AI & Combat
+## Demo
+https://felix-yenteho.artstation.com/projects/XJOExn
 
 ## Features
 ### Player System
