@@ -2,7 +2,7 @@
 A fully functional top-down RPG developed in Unreal Engine 5.4, showcasing core gameplay mechanics, AI behavior, dynamic environments, and scalable systems.
 
 ## Demo
-[Smart NPC AI: Combat, Navigation, and Decision-Making in UE5](https://felix-yenteho.artstation.com/projects/1NWlXL?album_id=14261120)
+- [Smart NPC AI: Combat, Navigation, and Decision-Making in UE5](https://felix-yenteho.artstation.com/projects/1NWlXL?album_id=14261120)
 
 ## Features
 ### Player System
