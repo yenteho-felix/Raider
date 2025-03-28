@@ -11,6 +11,7 @@
 #include "InputActionValue.h"
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
+#include "Share/MySpinAttackComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -59,6 +60,8 @@ void ARaiderPlayerController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ARaiderPlayerController::Look);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ARaiderPlayerController::Jump);
 		EnhancedInputComponent->BindAction(LightAttackAction, ETriggerEvent::Started, this, &ARaiderPlayerController::LightAttack);
+		EnhancedInputComponent->BindAction(HeavyAttackAction, ETriggerEvent::Started, this, &ARaiderPlayerController::StartHeavyAttack);
+		EnhancedInputComponent->BindAction(HeavyAttackAction, ETriggerEvent::Completed, this, &ARaiderPlayerController::StopHeavyAttack);
 		EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Started, this, &ARaiderPlayerController::Block);
 	}
 	else
@@ -173,6 +176,22 @@ void ARaiderPlayerController::LightAttack()
 	if (ARaiderCharacter* MyCharacter = Cast<ARaiderCharacter>(GetPawn()))
 	{
 		MyCharacter->LightAttack();
+	}
+}
+
+void ARaiderPlayerController::StartHeavyAttack()
+{
+	if (ARaiderCharacter* MyCharacter = Cast<ARaiderCharacter>(GetPawn()))
+	{
+		MyCharacter->SpinAttackComponent->StartSpinAttack();
+	}
+}
+
+void ARaiderPlayerController::StopHeavyAttack()
+{
+	if (ARaiderCharacter* MyCharacter = Cast<ARaiderCharacter>(GetPawn()))
+	{
+		MyCharacter->SpinAttackComponent->StopSpinAttack();
 	}
 }
 

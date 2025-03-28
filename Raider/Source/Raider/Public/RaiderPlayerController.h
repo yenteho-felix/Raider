@@ -59,6 +59,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* LightAttackAction;
 
+	/** Heavy Attack Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* HeavyAttackAction;
+
 	/** Blocking Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* BlockAction;
@@ -84,6 +88,8 @@ protected:
 	void Look(const FInputActionValue& Value);
 	void Jump();
 	void LightAttack();
+	void StartHeavyAttack();
+	void StopHeavyAttack();
 	void Block();
 
 private:

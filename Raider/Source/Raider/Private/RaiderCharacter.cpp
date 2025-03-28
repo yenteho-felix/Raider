@@ -16,6 +16,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Share/MyCombatComponent.h"
 #include "Share/MyHealthComponent.h"
+#include "Share/MySpinAttackComponent.h"
 
 ARaiderCharacter::ARaiderCharacter()
 	: TeamNumber(255),
@@ -58,6 +59,9 @@ ARaiderCharacter::ARaiderCharacter()
 
 	// Combat Component
 	CombatComponent = CreateDefaultSubobject<UMyCombatComponent>("CombatComponent");
+
+	// Spin Attack Component
+	SpinAttackComponent = CreateDefaultSubobject<UMySpinAttackComponent>("SpinAttackComponent");
 	
 }
 
