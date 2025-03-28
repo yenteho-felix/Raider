@@ -230,6 +230,31 @@ void ARaiderCharacter::OnAttackMontageNotifyHandler_Implementation(FName NotifyN
 		}
 	}
 
+	// if (NotifyName == "Spin")
+	// {
+	// 	const bool bHit = UKismetSystemLibrary::SphereTraceMultiForObjects(
+	// 		GetWorld(),
+	// 		GetActorLocation(),
+	// 		GetActorLocation() + (GetActorForwardVector() * 300.0f),
+	// 		100.0f,
+	// 		ObjectTypes,
+	// 		false,
+	// 		ActorsToIgnore,
+	// 		EDrawDebugTrace::ForDuration,
+	// 		HitResults,
+	// 		true
+	// 	);
+	// 	
+	// 	// Apply damage to all valid actors in the hit results
+	// 	FSDamageInfo DamageInfo;
+	// 	DamageInfo.Amount = 20;
+	// 	DamageInfo.DamageType = EDamageType::Melee;
+	// 	DamageInfo.DamageReact = EDamageReact::Hit;
+	// 	if (bHit && HitResults.Num() > 0)
+	// 	{
+	// 		CombatComponent->DamageAllNoneTeamMembers(HitResults, DamageInfo);
+	// 	}
+	// }
 	
 }
 

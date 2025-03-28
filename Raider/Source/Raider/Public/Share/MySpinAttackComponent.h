@@ -7,6 +7,8 @@
 #include "MySpinAttackComponent.generated.h"
 
 
+class ARaiderCharacter;
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class RAIDER_API UMySpinAttackComponent : public UActorComponent
 {
@@ -22,19 +24,23 @@ protected:
 
 public:
 	/** Startup animation */
-	UPROPERTY(EditDefaultsOnly, Category = "SpinAttack|Animation")
+	UPROPERTY(EditDefaultsOnly, Category = "Attack|Animation")
 	UAnimMontage* SpinMontage;
 
 	/** Spin rotation speed in degrees/second */
-	UPROPERTY(EditDefaultsOnly, Category = "SpinAttack|Config")
+	UPROPERTY(EditDefaultsOnly, Category = "Attack|Config")
 	float SpinRotationSpeed = 720.0f;
+
+	/** Max time allowed for spinning in second */
+	UPROPERTY(EditDefaultsOnly, Category = "Attack|Config")
+	float MaxSpinDuration = 5.0f;
 	
 	/** Call when spin input is pressed */
-	UFUNCTION(BlueprintCallable, Category = "SpinAttack")
+	UFUNCTION(BlueprintCallable, Category = "Attack")
 	void StartSpinAttack();
 
 	/** Call when spin input is released */
-	UFUNCTION(BlueprintCallable, Category = "SpinAttack")
+	UFUNCTION(BlueprintCallable, Category = "Attack")
 	void StopSpinAttack();
 
 private:
@@ -43,13 +49,16 @@ private:
 
 	/** Cached reference */
 	UPROPERTY()
-	ACharacter* OwnerCharacter;
+	ARaiderCharacter* OwnerCharacter;
 
 	/** Handle for spin rotation updates */
 	FTimerHandle SpinLoopTimer;
 
 	/** Delay before loop starts */
 	FTimerHandle SpinTransitionTimer;
+
+	/** Spin duration timer */
+	FTimerHandle SpinDurationTimer;
 
 	/** Whether the spin is active */
 	bool bIsSpinning;
@@ -59,4 +68,8 @@ private:
 
 	/** Rotates the mesh during spin loop */
 	void UpdateSpin();
+
+	/** Called when an animation notify begins during the spin attack montage */
+	UFUNCTION()
+	void OnAttackMontageNotifyBegin(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload);
 };

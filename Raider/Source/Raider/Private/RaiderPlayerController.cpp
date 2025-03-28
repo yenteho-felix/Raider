@@ -11,6 +11,7 @@
 #include "InputActionValue.h"
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
+#include "Share/MyCombatComponent.h"
 #include "Share/MySpinAttackComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -184,6 +185,7 @@ void ARaiderPlayerController::StartHeavyAttack()
 	if (ARaiderCharacter* MyCharacter = Cast<ARaiderCharacter>(GetPawn()))
 	{
 		MyCharacter->SpinAttackComponent->StartSpinAttack();
+		MyCharacter->CombatComponent->bIsInvincible = true;
 	}
 }
 
@@ -192,6 +194,7 @@ void ARaiderPlayerController::StopHeavyAttack()
 	if (ARaiderCharacter* MyCharacter = Cast<ARaiderCharacter>(GetPawn()))
 	{
 		MyCharacter->SpinAttackComponent->StopSpinAttack();
+		MyCharacter->CombatComponent->bIsInvincible = false;
 	}
 }
 
