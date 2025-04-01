@@ -7,6 +7,8 @@
 #include "Share/MyCombatInterface.h"
 #include "RaiderCharacter.generated.h"
 
+class UMyComboAttackComponent;
+class UMySpinAttackComponent;
 class UMyCombatComponent;
 class UMyHealthComponent;
 
@@ -71,16 +73,22 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Combat")
 	UMyCombatComponent* CombatComponent;
 
-	/** Indicates if character is currently attacking */
-	bool bIsAttacking;
-
-	UFUNCTION(Category = "Player")
-	void LightAttack();
+	/** Component handling combo attack */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Combat")
+	UMyComboAttackComponent* ComboAttackComponent;
+	
+	/** Component handling spin attack */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Combat")
+	UMySpinAttackComponent* SpinAttackComponent;
 	
 protected:
 	/** NPCCombatInterface, equip weapon function */
 	UFUNCTION(Category = "Player")
 	virtual void EquipWeapon_Implementation() override;
+
+	/** NPCCombatInterface, blocking an attack */
+	UFUNCTION(Category = "Player")
+	virtual void Block_Implementation() override;
 
 private:
 	/** Store the default walk speed */
@@ -134,23 +142,13 @@ public:
  *  ---------------------------------------------
  */
 public:
-	/**
-	 *  Handles attack montage animation notify events.
-	 *  @param NotifyName - The name of the notify event triggered from the attack montage.
-	 */
-	UFUNCTION(BlueprintNativeEvent, Category = "Player|Combat")
-	void OnAttackMontageNotifyHandler(FName NotifyName);
-	virtual void OnAttackMontageNotifyHandler_Implementation(FName NotifyName);
-
 	/** NPCCombatInterface, handle OnDeath delegate */
 	UFUNCTION(BlueprintCallable, Category = "Player|Combat")
 	virtual void OnDeathHandler_Implementation() override;
 
 protected:
-	/**
-	 * Handles the end of an attack sequence.
-	 */
-	UFUNCTION(Category = "Player|Combat")
-	void OnAttackEndHandler();
+	/** Reaction when blocking enemy's attack successfully */
+	UFUNCTION(Category = "Player|Combat")	
+	void OnDamageBlockedHandler();
 };
 

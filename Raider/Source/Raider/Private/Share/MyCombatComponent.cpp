@@ -21,11 +21,6 @@ UMyCombatComponent::UMyCombatComponent()
       NPCMontagePlayRate(1.0f),
 	  AttackRadius(150),
 	  DefendRadius(250),
-	  bIsNotifyBound(false),
-	  CurrentComboIndex(0),
-	  bComboRequested(false),
-	  bComboWindowOpen(false),
-	  AttackAnimInstance(nullptr),
 	  bIsInvincible(false),
 	  bIsBlocking(false),
 	  bIsInterruptible(true)
@@ -50,7 +45,7 @@ void UMyCombatComponent::EquipWeapon()
 		{
 			if (USkeletalMeshComponent* MeshComponent = Owner->FindComponentByClass<USkeletalMeshComponent>())
 			{
-				AttachWeaponToSocket(WeaponActorObj);
+				AttachWeaponToSocket(WeaponActorObj, WeaponSocketName);
 				PlayEquipMontage(EquipMontage);
 				IsWeaponEquipped = true;
 			}
@@ -71,16 +66,28 @@ void UMyCombatComponent::UnEquipWeapon()
 	}
 }
 
-void UMyCombatComponent::AttachWeaponToSocket(AActor* WeaponActor) const
+void UMyCombatComponent::EquipShield()
+{
+	if (ShieldActorClass)
+	{
+		ShieldActorObj = GetWorld()->SpawnActor<AWeaponBase>(ShieldActorClass, FVector::ZeroVector, FRotator::ZeroRotator);
+		if (const AActor* Owner = GetOwner())
+		{
+			AttachWeaponToSocket(ShieldActorObj, ShieldSocketName);
+		}
+	}
+}
+
+void UMyCombatComponent::AttachWeaponToSocket(AActor* WeaponActor, const FName SocketName) const
 {
 	if (const AActor* Owner = GetOwner())
 	{
 		USkeletalMeshComponent* MeshComponent = Owner->FindComponentByClass<USkeletalMeshComponent>();
-		if (MeshComponent->DoesSocketExist(WeaponSocketName))
+		if (MeshComponent->DoesSocketExist(SocketName))
 		{
 			if (WeaponActor)
 			{
-				WeaponActor->AttachToComponent(MeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, WeaponSocketName);
+				WeaponActor->AttachToComponent(MeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, SocketName);
 			}
 			else
 			{
@@ -89,7 +96,7 @@ void UMyCombatComponent::AttachWeaponToSocket(AActor* WeaponActor) const
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("Socket %s does not exists on %s"), *WeaponSocketName.ToString(), *Owner->GetName());
+			UE_LOG(LogTemp, Error, TEXT("Socket %s does not exists on %s"), *SocketName.ToString(), *Owner->GetName());
 		}
 	}
 }
@@ -201,7 +208,7 @@ bool UMyCombatComponent::IsOnSameTeam(AActor* OwnerActor, AActor* OtherActor) co
 		return false;
 	}
 	
-	if (OtherActor || !OtherActor->GetClass()->ImplementsInterface(UMyCombatInterface::StaticClass()))
+	if (!OtherActor || !OtherActor->GetClass()->ImplementsInterface(UMyCombatInterface::StaticClass()))
 	{
 		return false;
 	}
@@ -230,93 +237,46 @@ void UMyCombatComponent::GetCombatRange(float& OutAttackRadius, float& OutDefend
 
 void UMyCombatComponent::Attack(AActor* AttackTarget)
 {
-	if (!GetOwner() || !AttackMontages.IsValidIndex(CurrentComboIndex))
+	if (!GetOwner() || !AttackMontage)
 	{
 		return;
 	}
 
-	if (!AttackAnimInstance)
-	{
-		if (AActor* Owner = GetOwner())
-		{
-			if (USkeletalMeshComponent* MeshComponent = Owner->FindComponentByClass<USkeletalMeshComponent>())
-			{
-				AttackAnimInstance = MeshComponent->GetAnimInstance();
-			}			
-		}
-	}
-	
-	if (AttackAnimInstance && !AttackAnimInstance->IsAnyMontagePlaying())
-	{
-		PlayNextAttackMontage();
-	}
-	else if (bComboWindowOpen)
-	{
-		bComboRequested = true;
-	}
+	PlayAttackMontage(AttackMontage);
 	
 	CurrentAttackTarget = AttackTarget;
 }
 
 void UMyCombatComponent::PlayAttackMontage(UAnimMontage* AnimMontage)
 {
-	if (!AnimMontage || !AttackAnimInstance)
+	if (!AnimMontage)
 	{
 		return;
 	}
-	
-	// Ensure binding happens only once
-	if (!bIsNotifyBound)
+
+	if (AActor* Owner = GetOwner())
 	{
-		// Bind to montage notify
-		AttackAnimInstance->OnPlayMontageNotifyBegin.AddDynamic(this, &UMyCombatComponent::OnAttackMontageNotifyBegin);
-		bIsNotifyBound = true;
-	}
+		if (USkeletalMeshComponent* MeshComponent = Owner->FindComponentByClass<USkeletalMeshComponent>())
+		{
+			UAnimInstance* AttackAnimInstance = MeshComponent->GetAnimInstance();
 
-	// Adjust play rate based on owner type
-	if (const ACharacter* CharacterOwner = Cast<ACharacter>(GetOwner()))
-	{
-		const float MontagePlayRate = CharacterOwner->IsPlayerControlled() ? PlayerMontagePlayRate : NPCMontagePlayRate;
-		AttackAnimInstance->Montage_Play(AnimMontage, MontagePlayRate);
-	}
+			// Bind to montage notify
+			AttackAnimInstance->OnPlayMontageNotifyBegin.RemoveDynamic(this, &UMyCombatComponent::OnAttackMontageNotifyBegin);
+			AttackAnimInstance->OnPlayMontageNotifyBegin.AddDynamic(this, &UMyCombatComponent::OnAttackMontageNotifyBegin);
+
+			// Adjust play rate based on owner type
+			if (const ACharacter* CharacterOwner = Cast<ACharacter>(GetOwner()))
+			{
+				const float MontagePlayRate = CharacterOwner->IsPlayerControlled() ? PlayerMontagePlayRate : NPCMontagePlayRate;
+				AttackAnimInstance->Montage_Play(AnimMontage, MontagePlayRate);
+			}
 	
-	
-	// Bind to montage end event
-	FOnMontageEnded MontageEndDelegate;
-	MontageEndDelegate.BindUObject(this, &UMyCombatComponent::OnAttackMontageEnded);
-	AttackAnimInstance->Montage_SetEndDelegate(MontageEndDelegate, AnimMontage);
-}
-
-void UMyCombatComponent::PlayNextAttackMontage()
-{
-	if (!AttackMontages.IsValidIndex(CurrentComboIndex))
-	{
-		return;
+			// Bind to montage end event
+			FOnMontageEnded MontageEndDelegate;
+			MontageEndDelegate.BindUObject(this, &UMyCombatComponent::OnAttackMontageEnded);
+			AttackAnimInstance->Montage_SetEndDelegate(MontageEndDelegate, AnimMontage);
+		}			
 	}
-	
-	if (UAnimMontage* MontageToPlay = AttackMontages[CurrentComboIndex])
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("Current combo index is %d"), CurrentComboIndex);
-		PlayAttackMontage(MontageToPlay);
-
-		// Schedule when to open the combo window (e.g., % of the animation)
-		const float ComboWindowTime = MontageToPlay->GetPlayLength() * ComboWindowOpenTime;
-		GetWorld()->GetTimerManager().SetTimer(ComboWindowTimer, this, &UMyCombatComponent::OpenComboWindow, ComboWindowTime, false);
-
-		// Schedule when to close the combo window (e.g., % of the animation)
-		const float CloseWindowTime = MontageToPlay->GetPlayLength() * ComboWindowCloseTime;
-		GetWorld()->GetTimerManager().SetTimer(CloseComboWindowTimer, this, &UMyCombatComponent::CloseComboWindow, CloseWindowTime, false);
-	}
-}
-
-void UMyCombatComponent::OpenComboWindow()
-{
-	bComboWindowOpen = true;
-}
-
-void UMyCombatComponent::CloseComboWindow()
-{
-	bComboWindowOpen = false;
 }
 
 void UMyCombatComponent::OnAttackMontageNotifyBegin(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload)
@@ -326,32 +286,8 @@ void UMyCombatComponent::OnAttackMontageNotifyBegin(FName NotifyName, const FBra
 
 void UMyCombatComponent::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	// Clear the timer
-	GetWorld()->GetTimerManager().ClearTimer(ComboWindowTimer);
-	GetWorld()->GetTimerManager().ClearTimer(CloseComboWindowTimer);
-	
-	// Reset combo if interrupted
-	if (bInterrupted)
-	{
-		bComboRequested = false;
-		CurrentComboIndex = 0;
-		CurrentAttackTarget = nullptr;
-		TriggerOnAttackEnd();
-		return;
-	}
-
-	if (bComboRequested)
-	{
-		bComboRequested = false;
-		CurrentComboIndex = (CurrentComboIndex + 1) % AttackMontages.Num();
-		PlayNextAttackMontage();
-	}
-	else
-	{
-		CurrentComboIndex = 0;
-		CurrentAttackTarget = nullptr;
-		TriggerOnAttackEnd();
-	}
+	CurrentAttackTarget = nullptr;
+	TriggerOnAttackEnd();
 }
 
 void UMyCombatComponent::TriggerOnAttackEnd()
@@ -387,10 +323,15 @@ void UMyCombatComponent::TakeHit()
 {
 	if (TakeHitMontage)
 	{
-		if (const AActor* Owner = GetOwner())
-		{
-			PlayTakeHitMontage(TakeHitMontage);
-		}
+		PlayTakeHitMontage(TakeHitMontage);
+	}
+}
+
+void UMyCombatComponent::Block()
+{
+	if (BlockMontage)
+	{
+		PlayBlockingMontage(BlockMontage);
 	}
 }
 
@@ -417,8 +358,50 @@ void UMyCombatComponent::PlayTakeHitMontage(UAnimMontage* AnimMontage)
 	}
 }
 
+void UMyCombatComponent::PlayBlockingMontage(UAnimMontage* AnimMontage)
+{
+	if (!AnimMontage)
+	{
+		return;
+	}
+
+	if (const AActor* Owner = GetOwner())
+	{
+		if (const USkeletalMeshComponent* MeshComponent = Owner->FindComponentByClass<USkeletalMeshComponent>())
+		{
+			if (UAnimInstance* AnimInstance = MeshComponent->GetAnimInstance())
+			{
+				// Bind to montage notify
+				AnimInstance->OnPlayMontageNotifyBegin.RemoveDynamic(this, &UMyCombatComponent::OnBlockingMontageNotifyBegin);
+				AnimInstance->OnPlayMontageNotifyBegin.AddDynamic(this, &UMyCombatComponent::OnBlockingMontageNotifyBegin);
+
+				// Play montage
+				AnimInstance->Montage_Play(AnimMontage);
+
+				// Montage end delegate
+				FOnMontageEnded MontageEndDelegate;
+				MontageEndDelegate.BindUObject(this, &UMyCombatComponent::OnBlockingMontageEnded);
+				AnimInstance->Montage_SetEndDelegate(MontageEndDelegate, AnimMontage);
+			}
+		}
+	}
+}
+
 void UMyCombatComponent::OnTakeHitMontageEnded(UAnimMontage* Montage, bool bInterrupted) const
 {
 	OnTakeHitEnd.Broadcast();
+}
+
+void UMyCombatComponent::OnBlockingMontageNotifyBegin(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload)
+{
+	if (NotifyName == "BlockStart")
+	{
+		bIsBlocking = true;
+	}
+}
+
+void UMyCombatComponent::OnBlockingMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	bIsBlocking = false;
 }
 

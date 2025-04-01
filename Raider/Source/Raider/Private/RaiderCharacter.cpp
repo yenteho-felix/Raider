@@ -15,11 +15,12 @@
 #include "Engine/World.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Share/MyCombatComponent.h"
+#include "Share/MyComboAttackComponent.h"
 #include "Share/MyHealthComponent.h"
+#include "Share/MySpinAttackComponent.h"
 
 ARaiderCharacter::ARaiderCharacter()
 	: TeamNumber(255),
-	  bIsAttacking(false),
       AttackTokenCount(1)
 {
 	// Set size for player capsule
@@ -58,6 +59,12 @@ ARaiderCharacter::ARaiderCharacter()
 
 	// Combat Component
 	CombatComponent = CreateDefaultSubobject<UMyCombatComponent>("CombatComponent");
+
+	// Spin Attack Component
+	ComboAttackComponent = CreateDefaultSubobject<UMyComboAttackComponent>("ComboAttackComponent");
+	
+	// Spin Attack Component
+	SpinAttackComponent = CreateDefaultSubobject<UMySpinAttackComponent>("SpinAttackComponent");
 	
 }
 
@@ -135,100 +142,6 @@ bool ARaiderCharacter::IsDead_Implementation()
 	return !HealthComponent->IsAlive();
 }
 
-void ARaiderCharacter::OnAttackMontageNotifyHandler_Implementation(FName NotifyName)
-{
-	//UE_LOG(LogTemp, Warning, TEXT("Called C++ Default Attack Montage Notify"));
-
-
-    // Perform a multi-hit sphere trace in front of character
-	TArray<AActor*> ActorsToIgnore;
-	ActorsToIgnore.Add(this);
-
-	TArray<FHitResult> HitResults;
-	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
-	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
-
-	if (NotifyName == "Slash")
-	{
-		const bool bHit = UKismetSystemLibrary::SphereTraceMultiForObjects(
-			GetWorld(),
-			GetActorLocation(),
-			GetActorLocation() + (GetActorForwardVector() * 150.0f),
-			50.0f,
-			ObjectTypes,
-			false,
-			ActorsToIgnore,
-			EDrawDebugTrace::None,
-			HitResults,
-			true
-		);
-		
-		// Apply damage to all valid actors in the hit results
-		FSDamageInfo DamageInfo;
-		DamageInfo.Amount = 10;
-		DamageInfo.DamageType = EDamageType::Melee;
-		DamageInfo.DamageReact = EDamageReact::Hit;
-		if (bHit && HitResults.Num() > 0)
-		{
-			CombatComponent->DamageAllNoneTeamMembers(HitResults, DamageInfo);
-		}
-	}
-
-	if (NotifyName == "SlashB")
-	{
-		const bool bHit = UKismetSystemLibrary::SphereTraceMultiForObjects(
-			GetWorld(),
-			GetActorLocation(),
-			GetActorLocation() + (GetActorForwardVector() * 50.0f),
-			150.0f,
-			ObjectTypes,
-			false,
-			ActorsToIgnore,
-			EDrawDebugTrace::None,
-			HitResults,
-			true
-		);
-		
-		// Apply damage to all valid actors in the hit results
-		FSDamageInfo DamageInfo;
-		DamageInfo.Amount = 10;
-		DamageInfo.DamageType = EDamageType::Melee;
-		DamageInfo.DamageReact = EDamageReact::Hit;
-		if (bHit && HitResults.Num() > 0)
-		{
-			CombatComponent->DamageAllNoneTeamMembers(HitResults, DamageInfo);
-		}
-	}
-
-	if (NotifyName == "SlashC")
-	{
-		const bool bHit = UKismetSystemLibrary::SphereTraceMultiForObjects(
-			GetWorld(),
-			GetActorLocation(),
-			GetActorLocation() + (GetActorForwardVector() * 300.0f),
-			100.0f,
-			ObjectTypes,
-			false,
-			ActorsToIgnore,
-			EDrawDebugTrace::None,
-			HitResults,
-			true
-		);
-		
-		// Apply damage to all valid actors in the hit results
-		FSDamageInfo DamageInfo;
-		DamageInfo.Amount = 20;
-		DamageInfo.DamageType = EDamageType::Melee;
-		DamageInfo.DamageReact = EDamageReact::Hit;
-		if (bHit && HitResults.Num() > 0)
-		{
-			CombatComponent->DamageAllNoneTeamMembers(HitResults, DamageInfo);
-		}
-	}
-
-	
-}
-
 void ARaiderCharacter::OnDeathHandler_Implementation()
 {
 	//Play death animation
@@ -261,10 +174,11 @@ void ARaiderCharacter::OnDeathHandler_Implementation()
 	}
 }
 
-void ARaiderCharacter::OnAttackEndHandler()
+void ARaiderCharacter::OnDamageBlockedHandler()
 {
-	bIsAttacking = false;
-	GetCharacterMovement()->MaxWalkSpeed = DefaultWalkSpeed;
+	const float Force = 300.0f;
+	const FVector Backward = -GetActorForwardVector();
+	LaunchCharacter(Backward * Force, true, false);
 }
 
 void ARaiderCharacter::BeginPlay()
@@ -274,12 +188,10 @@ void ARaiderCharacter::BeginPlay()
 	if (CombatComponent)
 	{
 		// Prevent multiple bindings by unbinding first
-		CombatComponent->OnAttackMontageNotify.RemoveDynamic(this, &ARaiderCharacter::OnAttackMontageNotifyHandler);
-		CombatComponent->OnAttackEnd.RemoveDynamic(this, &ARaiderCharacter::OnAttackEndHandler);
+		CombatComponent->OnDamageBlocked.RemoveDynamic(this, &ARaiderCharacter::OnDamageBlockedHandler);
 
 		// Bind the delegates
-		CombatComponent->OnAttackMontageNotify.AddDynamic(this, &ARaiderCharacter::OnAttackMontageNotifyHandler);
-		CombatComponent->OnAttackEnd.AddDynamic(this, &ARaiderCharacter::OnAttackEndHandler);
+		CombatComponent->OnDamageBlocked.AddDynamic(this, &ARaiderCharacter::OnDamageBlockedHandler);
 	}
 
 	if (HealthComponent)
@@ -327,24 +239,19 @@ void ARaiderCharacter::EquipWeapon_Implementation()
 	}
 
 	CombatComponent->EquipWeapon();
+	CombatComponent->EquipShield();
 }
 
-void ARaiderCharacter::LightAttack() 
+void ARaiderCharacter::Block_Implementation()
 {
 	if (!CombatComponent)
 	{
 		return;
 	}
 
-	// If the player presses attack again during the combo window, queue the next attack
-	if (bIsAttacking && CombatComponent->IsComboWindowOpen()) 
+	// Skip block command if player is blocking already
+	if (!CombatComponent->bIsBlocking)
 	{
-		CombatComponent->Attack(nullptr);
-		return;
+		CombatComponent->Block();
 	}
-
-	// Start the first attack
-	bIsAttacking = true;
-	GetCharacterMovement()->MaxWalkSpeed = 50.0f; // Slowing movement during attack
-	CombatComponent->Attack(nullptr);
 }
