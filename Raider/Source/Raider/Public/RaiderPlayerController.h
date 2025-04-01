@@ -87,7 +87,8 @@ protected:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void Jump();
-	void LightAttack();
+	void StartLightAttack();
+	void StopLightAttack();
 	void StartHeavyAttack();
 	void StopHeavyAttack();
 	void Block();

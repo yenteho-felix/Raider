@@ -62,6 +62,13 @@ private:
 
 	/** Whether the spin is active */
 	bool bIsSpinning;
+
+	/** Walk speed the system set */
+	float DefaultWalkSpeed;
+
+	/** Walk speed while attacking */
+	UPROPERTY(EditDefaultsOnly, Category = "Attack|Config")
+	float AttackWalkSpeed;
 	
 	/** Called after SpinStart montage finishes */
 	void EnterSpinLoop();

@@ -15,6 +15,7 @@
 #include "Engine/World.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Share/MyCombatComponent.h"
+#include "Share/MyComboAttackComponent.h"
 #include "Share/MyHealthComponent.h"
 #include "Share/MySpinAttackComponent.h"
 
@@ -60,6 +61,9 @@ ARaiderCharacter::ARaiderCharacter()
 	// Combat Component
 	CombatComponent = CreateDefaultSubobject<UMyCombatComponent>("CombatComponent");
 
+	// Spin Attack Component
+	ComboAttackComponent = CreateDefaultSubobject<UMyComboAttackComponent>("ComboAttackComponent");
+	
 	// Spin Attack Component
 	SpinAttackComponent = CreateDefaultSubobject<UMySpinAttackComponent>("SpinAttackComponent");
 	
@@ -229,33 +233,6 @@ void ARaiderCharacter::OnAttackMontageNotifyHandler_Implementation(FName NotifyN
 			CombatComponent->DamageAllNoneTeamMembers(HitResults, DamageInfo);
 		}
 	}
-
-	// if (NotifyName == "Spin")
-	// {
-	// 	const bool bHit = UKismetSystemLibrary::SphereTraceMultiForObjects(
-	// 		GetWorld(),
-	// 		GetActorLocation(),
-	// 		GetActorLocation() + (GetActorForwardVector() * 300.0f),
-	// 		100.0f,
-	// 		ObjectTypes,
-	// 		false,
-	// 		ActorsToIgnore,
-	// 		EDrawDebugTrace::ForDuration,
-	// 		HitResults,
-	// 		true
-	// 	);
-	// 	
-	// 	// Apply damage to all valid actors in the hit results
-	// 	FSDamageInfo DamageInfo;
-	// 	DamageInfo.Amount = 20;
-	// 	DamageInfo.DamageType = EDamageType::Melee;
-	// 	DamageInfo.DamageReact = EDamageReact::Hit;
-	// 	if (bHit && HitResults.Num() > 0)
-	// 	{
-	// 		CombatComponent->DamageAllNoneTeamMembers(HitResults, DamageInfo);
-	// 	}
-	// }
-	
 }
 
 void ARaiderCharacter::OnDeathHandler_Implementation()

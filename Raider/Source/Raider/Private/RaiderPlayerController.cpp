@@ -12,6 +12,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
 #include "Share/MyCombatComponent.h"
+#include "Share/MyComboAttackComponent.h"
 #include "Share/MySpinAttackComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -60,7 +61,8 @@ void ARaiderPlayerController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ARaiderPlayerController::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ARaiderPlayerController::Look);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ARaiderPlayerController::Jump);
-		EnhancedInputComponent->BindAction(LightAttackAction, ETriggerEvent::Started, this, &ARaiderPlayerController::LightAttack);
+		EnhancedInputComponent->BindAction(LightAttackAction, ETriggerEvent::Started, this, &ARaiderPlayerController::StartLightAttack);
+		EnhancedInputComponent->BindAction(LightAttackAction, ETriggerEvent::Completed, this, &ARaiderPlayerController::StopLightAttack);
 		EnhancedInputComponent->BindAction(HeavyAttackAction, ETriggerEvent::Started, this, &ARaiderPlayerController::StartHeavyAttack);
 		EnhancedInputComponent->BindAction(HeavyAttackAction, ETriggerEvent::Completed, this, &ARaiderPlayerController::StopHeavyAttack);
 		EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Started, this, &ARaiderPlayerController::Block);
@@ -172,11 +174,19 @@ void ARaiderPlayerController::Jump()
 	}
 }
 
-void ARaiderPlayerController::LightAttack()
+void ARaiderPlayerController::StartLightAttack()
 {
 	if (ARaiderCharacter* MyCharacter = Cast<ARaiderCharacter>(GetPawn()))
 	{
-		MyCharacter->LightAttack();
+		MyCharacter->ComboAttackComponent->HandleAttackInput(nullptr);
+	}
+}
+
+void ARaiderPlayerController::StopLightAttack()
+{
+	if (ARaiderCharacter* MyCharacter = Cast<ARaiderCharacter>(GetPawn()))
+	{
+		MyCharacter->ComboAttackComponent->ResetCombo();
 	}
 }
 

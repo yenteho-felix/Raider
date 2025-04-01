@@ -7,6 +7,7 @@
 #include "Share/MyCombatInterface.h"
 #include "RaiderCharacter.generated.h"
 
+class UMyComboAttackComponent;
 class UMySpinAttackComponent;
 class UMyCombatComponent;
 class UMyHealthComponent;
@@ -72,6 +73,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Combat")
 	UMyCombatComponent* CombatComponent;
 
+	/** Component handling combo attack */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Combat")
+	UMyComboAttackComponent* ComboAttackComponent;
+	
 	/** Component handling spin attack */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Combat")
 	UMySpinAttackComponent* SpinAttackComponent;
