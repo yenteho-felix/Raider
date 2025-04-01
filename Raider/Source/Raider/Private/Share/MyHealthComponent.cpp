@@ -5,9 +5,9 @@
 
 // Sets default values for this component's properties
 UMyHealthComponent::UMyHealthComponent()
-	: AttackTokenCount(1),
+	: Health(100),
       MaxHealth(100),
-      Health(100)
+      AttackTokenCount(1)
 {
 	PrimaryComponentTick.bCanEverTick = false;
 }

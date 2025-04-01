@@ -80,13 +80,6 @@ public:
 	/** Component handling spin attack */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Combat")
 	UMySpinAttackComponent* SpinAttackComponent;
-
-	/** Indicates if character is currently attacking */
-	bool bIsAttacking;
-
-	/** Light Attack */
-	UFUNCTION(Category = "Player")
-	void LightAttack();
 	
 protected:
 	/** NPCCombatInterface, equip weapon function */
@@ -149,28 +142,12 @@ public:
  *  ---------------------------------------------
  */
 public:
-	/**
-	 *  Handles attack montage animation notify events.
-	 *  @param NotifyName - The name of the notify event triggered from the attack montage.
-	 */
-	UFUNCTION(BlueprintNativeEvent, Category = "Player|Combat")
-	void OnAttackMontageNotifyHandler(FName NotifyName);
-	virtual void OnAttackMontageNotifyHandler_Implementation(FName NotifyName);
-
 	/** NPCCombatInterface, handle OnDeath delegate */
 	UFUNCTION(BlueprintCallable, Category = "Player|Combat")
 	virtual void OnDeathHandler_Implementation() override;
 
 protected:
-	/**
-	 * Handles the end of an attack sequence.
-	 */
-	UFUNCTION(Category = "Player|Combat")
-	void OnAttackEndHandler();
-
-	/**
-	 *  Reaction when blocking enemy's attack successfully
-	 */
+	/** Reaction when blocking enemy's attack successfully */
 	UFUNCTION(Category = "Player|Combat")	
 	void OnDamageBlockedHandler();
 };

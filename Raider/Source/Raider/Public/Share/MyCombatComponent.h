@@ -151,15 +151,10 @@ public:
 	/** Variable to store attack target */
 	UPROPERTY()
 	AActor* CurrentAttackTarget;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
-	UDataTable* ComboDataTable;
-
-	FName CurrentComboRow;
 	
 	/** Array of attack montages for combo sequence */
 	UPROPERTY(EditDefaultsOnly, Category = "Combat|Attack|Montage")
-	TArray<UAnimMontage*> AttackMontages;
+	UAnimMontage* AttackMontage;
 
 	/** Adjust montage play rate for player */
 	UPROPERTY(EditDefaultsOnly, Category = "Combat|Attack|Montage")
@@ -168,14 +163,6 @@ public:
 	/** Adjust montage play rate for NPC */
 	UPROPERTY(EditDefaultsOnly, Category = "Combat|Attack|Montage")
 	float NPCMontagePlayRate;
-
-	/** The normalized time (0.0 - 1.0) within the attack montage when the combo window opens */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Combat|Attack|Combo", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float ComboWindowOpenTime = 0.5f;
-
-	/** The normalized time (0.0 - 1.0) within the attack montage when the combo window closes */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Combat|Attack|Combo", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float ComboWindowCloseTime = 0.95f;
 
 	/** The radius within which the NPC can perform an attack */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Attack|Radius")
@@ -200,9 +187,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat|Attack")
 	void Attack(AActor* AttackTarget);
 
-	/** Return if combo window is open */
-	bool IsComboWindowOpen() const {return bComboWindowOpen;}
-
 protected:
 	/**
 	 *  Plays the attack montage animation.
@@ -210,39 +194,6 @@ protected:
 	 */
 	UFUNCTION(Category = "Combat|Attack")
 	void PlayAttackMontage(UAnimMontage* AnimMontage);
-
-	/** Play the next attack montage in the sequence */
-	void PlayNextAttackMontage();
-
-	/** Enables the combo window, allowing the player to queue the next attack */
-	void OpenComboWindow();
-
-	/** Disable the combo window, preventing further attack input for chaining */
-	void CloseComboWindow();
-
-private:
-	/** Ensures OnPlayMontageNotifyBegin is only bound once. */
-	bool bIsNotifyBound;
-	
-	/** Tracks the current combo step */
-	int32 CurrentComboIndex;
-
-	/** If the player pressed attack again during the animation */
-	bool bComboRequested;
-
-	/** A combo attack window to take player's input */
-	bool bComboWindowOpen;
-
-	/** Reference to the active montage being played */
-	UPROPERTY()
-	UAnimInstance* AttackAnimInstance;
-
-	/** Timer for opening the combo window */
-	FTimerHandle ComboWindowTimer;
-
-	/** Timer for closing the combo window */
-	FTimerHandle CloseComboWindowTimer;
-	
 	
 /**
  *	---------------------------------------------

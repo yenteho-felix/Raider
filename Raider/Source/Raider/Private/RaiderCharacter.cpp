@@ -21,7 +21,6 @@
 
 ARaiderCharacter::ARaiderCharacter()
 	: TeamNumber(255),
-	  bIsAttacking(false),
       AttackTokenCount(1)
 {
 	// Set size for player capsule
@@ -143,98 +142,6 @@ bool ARaiderCharacter::IsDead_Implementation()
 	return !HealthComponent->IsAlive();
 }
 
-void ARaiderCharacter::OnAttackMontageNotifyHandler_Implementation(FName NotifyName)
-{
-	//UE_LOG(LogTemp, Warning, TEXT("Called C++ Default Attack Montage Notify"));
-
-
-    // Perform a multi-hit sphere trace in front of character
-	TArray<AActor*> ActorsToIgnore;
-	ActorsToIgnore.Add(this);
-
-	TArray<FHitResult> HitResults;
-	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
-	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
-
-	if (NotifyName == "Slash")
-	{
-		const bool bHit = UKismetSystemLibrary::SphereTraceMultiForObjects(
-			GetWorld(),
-			GetActorLocation(),
-			GetActorLocation() + (GetActorForwardVector() * 150.0f),
-			50.0f,
-			ObjectTypes,
-			false,
-			ActorsToIgnore,
-			EDrawDebugTrace::None,
-			HitResults,
-			true
-		);
-		
-		// Apply damage to all valid actors in the hit results
-		FSDamageInfo DamageInfo;
-		DamageInfo.Amount = 10;
-		DamageInfo.DamageType = EDamageType::Melee;
-		DamageInfo.DamageReact = EDamageReact::Hit;
-		if (bHit && HitResults.Num() > 0)
-		{
-			CombatComponent->DamageAllNoneTeamMembers(HitResults, DamageInfo);
-		}
-	}
-
-	if (NotifyName == "SlashB")
-	{
-		const bool bHit = UKismetSystemLibrary::SphereTraceMultiForObjects(
-			GetWorld(),
-			GetActorLocation(),
-			GetActorLocation() + (GetActorForwardVector() * 50.0f),
-			150.0f,
-			ObjectTypes,
-			false,
-			ActorsToIgnore,
-			EDrawDebugTrace::None,
-			HitResults,
-			true
-		);
-		
-		// Apply damage to all valid actors in the hit results
-		FSDamageInfo DamageInfo;
-		DamageInfo.Amount = 10;
-		DamageInfo.DamageType = EDamageType::Melee;
-		DamageInfo.DamageReact = EDamageReact::Hit;
-		if (bHit && HitResults.Num() > 0)
-		{
-			CombatComponent->DamageAllNoneTeamMembers(HitResults, DamageInfo);
-		}
-	}
-
-	if (NotifyName == "SlashC")
-	{
-		const bool bHit = UKismetSystemLibrary::SphereTraceMultiForObjects(
-			GetWorld(),
-			GetActorLocation(),
-			GetActorLocation() + (GetActorForwardVector() * 300.0f),
-			100.0f,
-			ObjectTypes,
-			false,
-			ActorsToIgnore,
-			EDrawDebugTrace::None,
-			HitResults,
-			true
-		);
-		
-		// Apply damage to all valid actors in the hit results
-		FSDamageInfo DamageInfo;
-		DamageInfo.Amount = 20;
-		DamageInfo.DamageType = EDamageType::Melee;
-		DamageInfo.DamageReact = EDamageReact::Hit;
-		if (bHit && HitResults.Num() > 0)
-		{
-			CombatComponent->DamageAllNoneTeamMembers(HitResults, DamageInfo);
-		}
-	}
-}
-
 void ARaiderCharacter::OnDeathHandler_Implementation()
 {
 	//Play death animation
@@ -267,12 +174,6 @@ void ARaiderCharacter::OnDeathHandler_Implementation()
 	}
 }
 
-void ARaiderCharacter::OnAttackEndHandler()
-{
-	bIsAttacking = false;
-	GetCharacterMovement()->MaxWalkSpeed = DefaultWalkSpeed;
-}
-
 void ARaiderCharacter::OnDamageBlockedHandler()
 {
 	const float Force = 300.0f;
@@ -287,13 +188,9 @@ void ARaiderCharacter::BeginPlay()
 	if (CombatComponent)
 	{
 		// Prevent multiple bindings by unbinding first
-		CombatComponent->OnAttackMontageNotify.RemoveDynamic(this, &ARaiderCharacter::OnAttackMontageNotifyHandler);
-		CombatComponent->OnAttackEnd.RemoveDynamic(this, &ARaiderCharacter::OnAttackEndHandler);
 		CombatComponent->OnDamageBlocked.RemoveDynamic(this, &ARaiderCharacter::OnDamageBlockedHandler);
 
 		// Bind the delegates
-		CombatComponent->OnAttackMontageNotify.AddDynamic(this, &ARaiderCharacter::OnAttackMontageNotifyHandler);
-		CombatComponent->OnAttackEnd.AddDynamic(this, &ARaiderCharacter::OnAttackEndHandler);
 		CombatComponent->OnDamageBlocked.AddDynamic(this, &ARaiderCharacter::OnDamageBlockedHandler);
 	}
 
@@ -357,24 +254,4 @@ void ARaiderCharacter::Block_Implementation()
 	{
 		CombatComponent->Block();
 	}
-}
-
-void ARaiderCharacter::LightAttack() 
-{
-	if (!CombatComponent)
-	{
-		return;
-	}
-
-	// If the player presses attack again during the combo window, queue the next attack
-	if (bIsAttacking && CombatComponent->IsComboWindowOpen()) 
-	{
-		CombatComponent->Attack(nullptr);
-		return;
-	}
-
-	// Start the first attack
-	bIsAttacking = true;
-	GetCharacterMovement()->MaxWalkSpeed = 50.0f; // Slowing movement during attack
-	CombatComponent->Attack(nullptr);
 }
