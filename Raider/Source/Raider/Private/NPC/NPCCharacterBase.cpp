@@ -23,11 +23,13 @@ ANPCCharacterBase::ANPCCharacterBase()
 	// Initialize movement speeds
 	WalkSpeed = 200.0f;
 	RunSpeed = 500.0f;
+	SprintSpeed = RunSpeed * 3.0f;
 	
 	float CurrentMaxSpeed = GetCharacterMovement()->GetMaxSpeed();
 	MovementSpeeds.Add(ECharacterMovementState::Idle, 0.0f);
 	MovementSpeeds.Add(ECharacterMovementState::Walking, WalkSpeed);
 	MovementSpeeds.Add(ECharacterMovementState::Running, RunSpeed);
+	MovementSpeeds.Add(ECharacterMovementState::Sprinting, SprintSpeed);
 
 	// Combat component
 	CombatComponent = CreateDefaultSubobject<UMyCombatComponent>("CombatComponent");

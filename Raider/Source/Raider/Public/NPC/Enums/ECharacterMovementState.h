@@ -13,4 +13,5 @@ enum class ECharacterMovementState : uint8
 	Idle		UMETA(DisplayName = "Idle"),
 	Walking		UMETA(DisplayName = "Walking"),
 	Running		UMETA(DisplayName = "Running"),
+	Sprinting	UMETA(DisplayName = "Sprinting"),
 };
