@@ -23,11 +23,13 @@ ANPCCharacterBase::ANPCCharacterBase()
 	// Initialize movement speeds
 	WalkSpeed = 200.0f;
 	RunSpeed = 500.0f;
+	SprintSpeed = RunSpeed * 3.0f;
 	
 	float CurrentMaxSpeed = GetCharacterMovement()->GetMaxSpeed();
 	MovementSpeeds.Add(ECharacterMovementState::Idle, 0.0f);
 	MovementSpeeds.Add(ECharacterMovementState::Walking, WalkSpeed);
 	MovementSpeeds.Add(ECharacterMovementState::Running, RunSpeed);
+	MovementSpeeds.Add(ECharacterMovementState::Sprinting, SprintSpeed);
 
 	// Combat component
 	CombatComponent = CreateDefaultSubobject<UMyCombatComponent>("CombatComponent");
@@ -222,15 +224,16 @@ bool ANPCCharacterBase::TakeDamage_Implementation(AActor* Attacker, const FSDama
 	{
 		// Apply damage to health
 		HealthComponent->TakeDamage(DamageInfo.Amount);
-
+		
 		// Report damage event to AI perception system
+		FVector InstigatorLocation = Attacker ? Attacker->GetActorLocation() : FVector::ZeroVector;
 		UAISense_Damage::ReportDamageEvent(
 			GetWorld(),
 			GetOwner(),
 			Attacker,
 			DamageInfo.Amount,
 			GetOwner()->GetActorLocation(),
-			Attacker->GetActorLocation()
+			InstigatorLocation
 		);
 		
 		return true;

@@ -95,6 +95,15 @@ int32 ARaiderCharacter::GetTeamNumber_Implementation()
 	return TeamNumber;
 }
 
+void ARaiderCharacter::TakeHealing_Implementation(float Amount)
+{
+	if (!HealthComponent)
+	{
+		return;
+	}
+	HealthComponent->TakeHealing(Amount);
+}
+
 bool ARaiderCharacter::TakeDamage_Implementation(AActor* Attacker, const FSDamageInfo& DamageInfo)
 {
 	if (!HealthComponent || !CombatComponent)

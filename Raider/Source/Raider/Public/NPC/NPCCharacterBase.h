@@ -150,6 +150,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NPC|Combat Interface|Movement")
 	float RunSpeed;
 
+	/** Sprinting speed of the NPC */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NPC|Combat Interface|Movement")
+	float SprintSpeed;
+
 	/** NPCCombatInterface, retrieves the patrol route assigned to the NPC */
 	UFUNCTION(Category = "NPC|Combat Interface")
 	virtual AActor* GetPatrolRoute_Implementation() override;

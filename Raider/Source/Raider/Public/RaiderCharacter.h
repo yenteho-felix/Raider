@@ -120,6 +120,10 @@ public:
 	UFUNCTION(Category = "Player")
 	virtual int32 GetTeamNumber_Implementation() override;
 
+	/** Restores the NPC's health by a specified amount */
+	UFUNCTION(Category = "NPC")
+	virtual void TakeHealing_Implementation(float Amount) override;
+	
 	/** NPCCombatInterface, take damage function */
 	UFUNCTION(Category = "Player")
 	virtual bool TakeDamage_Implementation(AActor* Attacker, const FSDamageInfo& DamageInfo) override;
