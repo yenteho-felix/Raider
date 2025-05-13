@@ -1,14 +1,14 @@
 ﻿// Copyright © 2025 Felix Ho. All Rights Reserved.
 
 
-#include "Share/MyCombatComponent.h"
+#include "Components//MyCombatComponent.h"
 
 #include "DelayAction.h"
 #include "TimerManager.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Share/MyCombatInterface.h"
-#include "Share/Struct/FSDamageInfo.h"
+#include "Interfaces/MyCombatInterface.h"
+#include "Structs/FSDamageInfo.h"
 #include "Weapon/WeaponBase.h"
 #include "WorldPartition/HLOD/DestructibleHLODComponent.h"
 

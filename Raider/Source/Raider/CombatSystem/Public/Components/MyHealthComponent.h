@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CombatSystemAPI.h"
 #include "Components/ActorComponent.h"
 #include "MyHealthComponent.generated.h"
 
@@ -18,7 +19,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeath);
  *  =====================================================
  */
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class RAIDER_API UMyHealthComponent : public UActorComponent
+class COMBATSYSTEM_API UMyHealthComponent : public UActorComponent
 {
 	GENERATED_BODY()
 

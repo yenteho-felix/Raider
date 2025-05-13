@@ -18,6 +18,14 @@ public class Raider : ModuleRules
 		        "UMG"
 	        });
         
+        PublicIncludePaths.AddRange(new string[] 
+	        {
+		        "Raider",
+		        "Raider/CombatSystem",
+		        "Raider/CombatSystem/Public"
+	        }
+        );
+        
         OptimizeCode = CodeOptimization.Never;  // remove from real game
     }
 }

@@ -14,10 +14,10 @@
 #include "Materials/Material.h"
 #include "Engine/World.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Share/MyCombatComponent.h"
-#include "Share/MyComboAttackComponent.h"
-#include "Share/MyHealthComponent.h"
-#include "Share/MySpinAttackComponent.h"
+#include "../CombatSystem/Public/Components/MyCombatComponent.h"
+#include "../CombatSystem/Public/Components/MyComboAttackComponent.h"
+#include "../CombatSystem/Public/Components/MyHealthComponent.h"
+#include "../CombatSystem/Public/Components/MySpinAttackComponent.h"
 
 ARaiderCharacter::ARaiderCharacter()
 	: TeamNumber(255),

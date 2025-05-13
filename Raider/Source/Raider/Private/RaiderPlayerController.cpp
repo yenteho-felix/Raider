@@ -11,9 +11,9 @@
 #include "InputActionValue.h"
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
-#include "Share/MyCombatComponent.h"
-#include "Share/MyComboAttackComponent.h"
-#include "Share/MySpinAttackComponent.h"
+#include "CombatSystem/Public/Components/MyCombatComponent.h"
+#include "CombatSystem/Public/Components/MyComboAttackComponent.h"
+#include "CombatSystem/Public/Components/MySpinAttackComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 

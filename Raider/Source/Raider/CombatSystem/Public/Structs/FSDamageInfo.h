@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Share/Enums/EDamageReact.h"
-#include "Share/Enums/EDamageType.h"
+#include "Enums/EDamageReact.h"
+#include "Enums/EDamageType.h"
 #include "FSDamageInfo.generated.h"
 
 
