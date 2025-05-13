@@ -1,7 +1,7 @@
 // Game Development Exercise by Felix Ho
 
 
-#include "Share/MyCombatInterface.h"
+#include "Interfaces/MyCombatInterface.h"
 
 void IMyCombatInterface::GetCombatRange_Implementation(float& OutAttackRadius, float& OutDefendRadius)
 {

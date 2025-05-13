@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GenericTeamAgentInterface.h"
-#include "Share/MyCombatInterface.h"
+#include "../CombatSystem/Public/Interfaces/MyCombatInterface.h"
 #include "GameFramework/Character.h"
 #include "NPCCharacterBase.generated.h"
 

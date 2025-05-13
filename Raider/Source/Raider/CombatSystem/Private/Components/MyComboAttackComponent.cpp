@@ -1,12 +1,12 @@
 ﻿// Copyright © 2025 Felix Ho. All Rights Reserved.
 
 
-#include "Share/MyComboAttackComponent.h"
+#include "Components//MyComboAttackComponent.h"
 
 #include "RaiderCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Share/MyCombatComponent.h"
+#include "Components/MyCombatComponent.h"
 
 
 // Sets default values for this component's properties

@@ -1,4 +1,4 @@
-﻿#include "Share/Struct/FSDamageInfo.h"
+﻿#include "Structs/FSDamageInfo.h"
 
 FSDamageInfo::FSDamageInfo()
 	: Amount(0.0f),

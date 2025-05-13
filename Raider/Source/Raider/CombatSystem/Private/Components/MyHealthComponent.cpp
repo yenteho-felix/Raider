@@ -1,7 +1,7 @@
 ﻿// Copyright © 2025 Felix Ho. All Rights Reserved.
 
 
-#include "Share/MyHealthComponent.h"
+#include "Components/MyHealthComponent.h"
 
 // Sets default values for this component's properties
 UMyHealthComponent::UMyHealthComponent()

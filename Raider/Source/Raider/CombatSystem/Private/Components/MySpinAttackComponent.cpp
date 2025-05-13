@@ -1,14 +1,14 @@
 ﻿// Copyright © 2025 Felix Ho. All Rights Reserved.
 
 
-#include "Share/MySpinAttackComponent.h"
+#include "Components/MySpinAttackComponent.h"
 
 #include "RaiderCharacter.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Share/MyCombatComponent.h"
-#include "Share/Struct/FSDamageInfo.h"
+#include "Components/MyCombatComponent.h"
+#include "Structs/FSDamageInfo.h"
 
 
 // Sets default values for this component's properties

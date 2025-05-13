@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Share/MyCombatInterface.h"
+#include "CombatSystem/Public/Interfaces/MyCombatInterface.h"
 #include "RaiderCharacter.generated.h"
 
 class UMyComboAttackComponent;

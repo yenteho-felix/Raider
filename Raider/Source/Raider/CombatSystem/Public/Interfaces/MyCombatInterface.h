@@ -4,8 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "CombatSystemAPI.h"
 #include "NPC/Enums/ECharacterMovementState.h"
-#include "Struct/FSDamageInfo.h"
+#include "Structs/FSDamageInfo.h"
 #include "MyCombatInterface.generated.h"
 
 // Make the interface blueprintable
@@ -20,7 +21,7 @@ class UMyCombatInterface : public UInterface
  *  A Combat interface to hold combat related functions that NPC needs
  *  =========================================================================
  */
-class RAIDER_API IMyCombatInterface
+class COMBATSYSTEM_API IMyCombatInterface
 {
 	GENERATED_BODY()
 

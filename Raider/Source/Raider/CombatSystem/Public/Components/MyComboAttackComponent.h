@@ -3,12 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CombatSystemAPI.h"
 #include "Components/ActorComponent.h"
 #include "MyComboAttackComponent.generated.h"
 
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class RAIDER_API UMyComboAttackComponent : public UActorComponent
+class COMBATSYSTEM_API UMyComboAttackComponent : public UActorComponent
 {
 	GENERATED_BODY()
 

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CombatSystemAPI.h"
 #include "Components/ActorComponent.h"
 #include "MySpinAttackComponent.generated.h"
 
@@ -10,7 +11,7 @@
 class ARaiderCharacter;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class RAIDER_API UMySpinAttackComponent : public UActorComponent
+class COMBATSYSTEM_API UMySpinAttackComponent : public UActorComponent
 {
 	GENERATED_BODY()
 

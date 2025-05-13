@@ -10,8 +10,8 @@
 #include "NPC/NPCAIController.h"
 #include "NPC/Enums/ECharacterMovementState.h"
 #include "Perception/AISense_Damage.h"
-#include "Share/MyCombatComponent.h"
-#include "Share/MyHealthComponent.h"
+#include "../CombatSystem/Public/Components//MyCombatComponent.h"
+#include "../CombatSystem/Public/Components/MyHealthComponent.h"
 
 // Sets default values
 ANPCCharacterBase::ANPCCharacterBase()
